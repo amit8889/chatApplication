@@ -4,13 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Example</title>
+    <title>WebSocket </title>
     <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
     <script>
-        const socket =  io();
+        const socket =  io("",{
+            query:{  accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF2NDE2MDQ0QGdtYWlsLmNvbSIsIm5hbWUiOiJBbWl0IiwiaWF0IjoxNzMwMzE0MDU1LCJleHAiOjE3MzI5MDYwNTV9.MXm-d_zloXIk9I0Pb5tlCfdjfSGiw-8wvuLAYObay0k"}
+        });
 
         socket.addEventListener('open', () => {
             console.log('Connected to server');
@@ -24,7 +26,7 @@
             console.log('Disconnected from server');
         });
     </script>
-    <h1>Hello</h1>
+    <h1>WebSocket connection testing!!</h1>
 </body>
 
 </html>
