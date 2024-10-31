@@ -1,0 +1,90 @@
+/* Chat.module.css */
+.container {
+    display: flex;
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+  
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    box-sizing: border-box;    
+  }
+  
+  .messages {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
+    align-items: end;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+  }
+
+  /* For WebKit browsers */
+  .messages::-webkit-scrollbar {
+    width: 10px; /* Width of the scrollbar */
+    height: 10px; /* Height of the scrollbar */
+  }
+  
+  .messages::-webkit-scrollbar-track {
+    background: #f0f0f0; /* Background of the scrollbar track */
+    border-radius: 10px; /* Rounded corners for the track */
+  }
+  
+  .messages::-webkit-scrollbar-thumb {
+    background-color: #a39e9e; /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded corners for the thumb */
+    border: 3px solid #f0f0f0; /* Adds padding around the thumb for a separated effect */
+  }
+  
+  .messages::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Darker color on hover */
+  }
+
+  .message{
+    background-color: #007bff;
+    border-radius: 5px;
+    padding: 2px;
+  }
+  .ownMessage{
+    background-color: #28a745;
+    border-radius: 5px;
+    padding: 2px;
+    width: 100%;
+    text-align: start;
+    
+  }
+  
+  .input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    outline: white;
+  }
+
+  .msgInput{    
+    bottom: 0;
+    display: flex;
+    flex-direction: row;
+
+  }
+
+  .sendBtn{
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 5px;
+    outline: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .sendBtn:hover {
+    background-color: #0056b3;
+  }
+  
