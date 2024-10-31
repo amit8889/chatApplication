@@ -12,8 +12,8 @@ io.use(async (socket, next) => {
   const { accessToken } = socket.handshake.query;
   try {
     const userData = verifyAccessToken(accessToken);
-    if (!userData) {
-      throw new Error("Authentication error");
+   if (!userData) {
+     throw new Error("Authentication error");
     }
     console.log(userData);
     // Attach user data to socket for further use
@@ -61,33 +61,41 @@ io.on("connection", (socket) => {
 
   // group chat
   socket.on("createRoom", async (data) => {
-    const { roomName, emails } = data;
-    const { email, name } = socket.userData;
-    const socketIds = getSocketIdsByEmail([emails, email]);
-    const room_name = roomName; // `${roomName}_${email.substring(0, 10)}`
-    if (socketIds) {
-      for (let socket_id of socketIds) {
-        const socketData = io.sockets.sockets.get(socket_id?.socketId); // Get the specific socket by ID
-        if (socketData) {
-          socketData.join(room_name);
-          if (!socketData.roomsJoined) {
-            socketData.roomsJoined = [];
+    try {
+      const { roomName, emails } = data;
+      const { email, name } = socket.userData;
+      const socketIds = await getSocketIdsByEmail([...emails, email],true);
+      const room_name = roomName; // Use unique naming if needed
+      if (socketIds) {
+        for (let socket_id of socketIds) {
+          const socketData = io.sockets.sockets.get(socket_id);
+          if (socketData) {
+            await socketData.join(room_name);
+            if (!socketData.roomsJoined) {
+              socketData.roomsJoined = [];
+            }
+            const joinData = {
+              roomName: room_name,
+              email: socketData.userData.email,
+              name: socketData.userData.name,
+            };
+            //io.to(room_name).emit("roomJoined", joinData);
+            socket.to(room_name).emit("roomJoined", joinData);
+          } else {
+            console.error(`Socket ID ${socket_id?.socketId} not found.`);
           }
-          const joinData = {
-            roomName: room_name,
-            email: socketData.userData.email,
-            name: socketData.userData.name,
-          };
-          socket.to(room_name).emit("roomJoined", joinData);
         }
       }
+    } catch (error) {
+      console.error('Error creating room:', error);
     }
   });
+  
 
   // send message to room
   socket.on("messageSendToRoom", async (data) => {
     const { roomName, message } = data;
-    socket.to(roomName).emit("messa",{
+    socket.to(roomName).emit("messageSendToRoom",{
       roomName: roomName,
       message: message,
       email: socket.userData.email,

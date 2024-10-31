@@ -42,7 +42,7 @@ const removeLiveUser = async ({ email }) => {
   }
 };
 
-const getSocketIdsByEmail = async (email) => {
+const getSocketIdsByEmail = async (email,isMulti) => {
   try {
     const pool = getPool();
     const query = `
@@ -54,6 +54,9 @@ const getSocketIdsByEmail = async (email) => {
     const [result] = await pool.query(query, data);
     if (result.length > 0) {
       console.log("one row found", result);
+      if(isMulti){
+        return result.map((item) => item.socketId);
+      }
       return result[0].socketId;
     }
     return null;
