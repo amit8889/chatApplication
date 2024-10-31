@@ -1,11 +1,10 @@
 const {
   getSocketInstance,
-  disconnetAllSocket,
-  getSocketIdsByEmail,
-  searchUser,
+  disconnetAllSocket
 } = require("../connection/socketConnection");
 const { verifyAccessToken } = require("../services/tokenService");
 const { addLiveUser, removeLiveUser } = require("../common/userMethod");
+const {searchUser,getSocketIdsByEmail} = require('../common/userMethod')
 
 // socket instance
 const io = getSocketInstance();
@@ -31,14 +30,17 @@ io.on("connection", (socket) => {
   const { name, email } = socket.userData;
   addLiveUser({ name, email, status: "ONLINE", socketId: socket.id });
 
-  socket.on("message", (data) => {
+  socket.on("directMessage", async(data) => {
+    const { email,name} = socket.userData;
     //get socketId
-    const [socketId] = getSocketIdsByEmail([data.to]);
-    if (socketId?.socketId) {
+    const socketId =await getSocketIdsByEmail([data.to]);
+    if (socketId) {
       // to prevent from same room name and socked id
-      const targetSocket = io.sockets.sockets.get(socketId?.socketId);
+      const targetSocket = io.sockets.sockets.get(socketId);
+      console.log(targetSocket)
+      console.log({ from: email, message: data.message })
       if (targetSocket) {
-        targetSocket.emit("message", { from: email, message: data.message });
+        targetSocket.emit("directMessage", { from: email,name:name, message: data.message });
       } else {
         socket.emit("userDisconnected", { email: email });
       }
@@ -49,7 +51,11 @@ io.on("connection", (socket) => {
 
   //search user
   socket.on("searchUser", async (data) => {
-    const liveUser = await searchUser();
+    const { email } = socket.userData;
+    console.log("====search event come==",data)
+    const liveUser = await searchUser({search:data,email:email});
+    console.log("live")
+    console.log(liveUser)
     socket.emit("searchUser", liveUser);
   });
 
@@ -72,35 +78,35 @@ io.on("connection", (socket) => {
             email: socketData.userData.email,
             name: socketData.userData.name,
           };
-          socket.to(room_name).emit("roomJoin", joinData);
+          socket.to(room_name).emit("roomJoined", joinData);
         }
       }
     }
   });
 
   // send message to room
-  socket.on("messageToRoom", async (data) => {
+  socket.on("messageSendToRoom", async (data) => {
     const { roomName, message } = data;
-    socket.to(roomName).emit({
+    socket.to(roomName).emit("messa",{
       roomName: roomName,
       message: message,
       email: socket.userData.email,
       name: socket.userData.name,
     });
   });
-  socket.on("roomJoin", (data) => {
-    const { roomName, email, name } = data;
-    socket.join(roomName);
-    if (!socket.roomsJoined) {
-      socket.roomsJoined = [];
-    }
-    socket.roomsJoined.push(roomName);
-    socket.to(roomName).emit("roomJoin", {
-      roomName: roomName,
-      email: email,
-      name: name,
-    });
-  });
+//   socket.on("roomJoin", (data) => {
+//     const { roomName, email, name } = data;
+//     socket.join(roomName);
+//     if (!socket.roomsJoined) {
+//       socket.roomsJoined = [];
+//     }
+//     socket.roomsJoined.push(roomName);
+//     socket.to(roomName).emit("roomJoin", {
+//       roomName: roomName,
+//       email: email,
+//       name: name,
+//     });
+//   });
   socket.on("leaveRoom", async (data) => {
     const { roomName } = data;
     socket.leave(roomName);

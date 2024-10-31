@@ -4,11 +4,12 @@ const addLiveUser = async ({ name, email, status, socketId }) => {
   try {
     const pool = getPool();
     const query = `
-            INSERT INTO liveUser (name, email, status, socketId)
-            VALUES (?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE status = 'ONLINE'
-        `;
+        INSERT INTO liveUser (name, email, status, socketId)
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE status = 'ONLINE', socketId = VALUES(socketId)
+    `;
     const data = [name, email, status, socketId];
+
     const [result] = await pool.query(query, data);
     if (result.affectedRows > 0) {
       console.log("one row inserted", result?.insertId);
@@ -61,15 +62,19 @@ const getSocketIdsByEmail = async (email) => {
     return null;
   }
 };
-const searchUser = async (search) => {
+const searchUser = async ({search,email}) => {
   try {
     const pool = getPool();
+    // remove current user form filter
     const query = `
         SELECT name,email FROM liveUser
         WHERE status = "ONLINE"
         AND (email LIKE ? OR name LIKE ?)
+        AND email != ?
     `;
-    const data = [`%${search}%`,`%${search}%`];
+    const data = [`%${search}%`,`%${search}%`,email];
+    console.log(query)
+    console.log(data)
     const [result] = await pool.query(query, data);
     if (result.length > 0) {
       return result;

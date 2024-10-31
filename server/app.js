@@ -1,7 +1,10 @@
 const express = require('express');
 const app = express()
 const path = require('path')
-
+const cors = require('cors');
+app.use(cors({
+    origin:"*"
+}))
 //dot env setup
 require('dotenv').config({ path: './config/config.env' })
 
