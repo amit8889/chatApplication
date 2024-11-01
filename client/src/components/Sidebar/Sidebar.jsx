@@ -1,7 +1,7 @@
 import React, { useState,useRef,useEffect } from 'react';
 import styles from './Sidebar.module.css';
 import {getSocketInstance} from '../../services/websocket.js'
-function Sidebar({ usersAndRoom, onUserAndRoomSelect ,setSearchResult,selectedUser}) {
+function Sidebar({ usersAndRoom, onUserAndRoomSelect ,setSearchResult,selectedUser,setIsCreateGrpPopupOpen}) {
 //  const [searchTerm, setSearchTerm] = useState('');
   const debounceRef = useRef(null)
 
@@ -58,6 +58,10 @@ function Sidebar({ usersAndRoom, onUserAndRoomSelect ,setSearchResult,selectedUs
           </li>
         ))}
       </ul>
+      <button 
+      className={styles.createGroupBtn}
+      onClick={e=>setIsCreateGrpPopupOpen(true)}
+      >+</button>
     </div>
   );
 }

@@ -3,8 +3,12 @@ import Sidebar from "../Sidebar/Sidebar";
 import { socketInit, sendDirectMessage } from "../../services/websocket";
 import styles from "./Chat.module.css";
 import SeachPopUp from "../SearchPopUp/SeachPopUp"
+import CreateGroupPopup from "../CreateGroupPopup/CreateGroupPopup";
 function Chat({ loginData }) {
   const [message, setMessage] = useState("");
+  const [isCreateGrpPopupOpen,setIsCreateGrpPopupOpen]=useState(false);
+  
+  
   // const [messages, setMessages] = useState([{username:"Atul", message:"Hey, How are you?"},
   //     {username:"Atul", message:"Hey, How are you doing?"},
   //     {username:"Atul", message:"Hey, How are you?"},{username:"Atul", message:"Hey, How are you doing?"},
@@ -27,6 +31,11 @@ function Chat({ loginData }) {
     direct: {},
     room: {},
   });
+
+  useEffect(()=>{
+    if(isCreateGrpPopupOpen)
+      setIsCreateGrpPopupOpen(true);
+  },[isCreateGrpPopupOpen]);
   const [selectedUser, setSelectedUser] = useState(null);
 //   const [usersAndRoom, setUsersAndRoom] = useState([
 //     {
@@ -127,19 +136,27 @@ function Chat({ loginData }) {
   const onUserAndRoomSelect = (data, room = false) => {
     setSelectedUser(data);
   };
-  const handleSearchUser = (data)=>{
-    setUsersAndRoom([...usersAndRoom,{...data}])
+  const handleSearchUser = (data)=>{      
+    const emailExists = usersAndRoom.some(item => item.email === data.email);    
+    if(!emailExists)
+      setUsersAndRoom([...usersAndRoom,{...data}])
   }
+
+  
   return (
     <div className={styles.container}>
         {
             searchResult && <SeachPopUp searchResult={searchResult} handleSearchUser={handleSearchUser}/>
+        }
+        {
+          isCreateGrpPopupOpen&&<CreateGroupPopup setIsCreateGrpPopupOpen={setIsCreateGrpPopupOpen}/>
         }
       <Sidebar
         usersAndRoom={usersAndRoom}
         onUserAndRoomSelect={onUserAndRoomSelect}
         setSearchResult={setSearchResult}
         selectedUser={selectedUser}
+        setIsCreateGrpPopupOpen={setIsCreateGrpPopupOpen}
       />
       <div className={styles.main}>
         <div className={styles.messages}>
