@@ -18,3 +18,21 @@ export const requestOtp=async(email)=> {
         console.log(error);
     }   
   }
+
+  export const uploadFile = async(data,token)=>{
+    try{
+        
+
+        const response = await axios.post(`${URL}/upload`, data, {
+            headers: {
+            'Authorization': `Bearer ${token}`,
+            },
+        });
+
+        return response.data.fileUrl;
+    }catch(error){
+        console.log(error)
+        return null
+    }
+
+  }

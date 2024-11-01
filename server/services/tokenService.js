@@ -9,7 +9,7 @@ class TokenService{
     }
    //verify access token
      verifyAccessToken(token)
-    {  
+    {   
         return  jwt.verify(token,accesstokensecreat);
     }
 

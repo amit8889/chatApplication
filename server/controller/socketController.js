@@ -37,7 +37,7 @@ io.on("connection", (socket) => {
     if (socketId) {
       // to prevent from same room name and socked id
       const targetSocket = io.sockets.sockets.get(socketId);
-      console.log(targetSocket)
+     // console.log(targetSocket)
       console.log({ from: email, message: data.message })
       if (targetSocket) {
         targetSocket.emit("directMessage", { from: email,name:name, message: data.message });

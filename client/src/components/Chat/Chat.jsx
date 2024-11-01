@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../Sidebar/Sidebar";
 import { socketInit, sendDirectMessage } from "../../services/websocket";
+import {uploadFile} from "../../services/api.js"
 import styles from "./Chat.module.css";
 import SeachPopUp from "../SearchPopUp/SeachPopUp"
 import CreateGroupPopup from "../CreateGroupPopup/CreateGroupPopup";
 function Chat({ loginData }) {
   const [message, setMessage] = useState("");
   const [isCreateGrpPopupOpen,setIsCreateGrpPopupOpen]=useState(false);
+  const[disableButton,setDisableButton] = useState(false)
   
   
   // const [messages, setMessages] = useState([{username:"Atul", message:"Hey, How are you?"},
@@ -142,7 +144,40 @@ function Chat({ loginData }) {
       setUsersAndRoom([...usersAndRoom,{...data}])
   }
 
-  
+  const handleFileUpload = async(file)=>{
+    if (!file) {
+      alert('Please select a file first!');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('media', file);
+
+    try {
+      const response = await uploadFile(formData,loginData.accessToken)
+      if(response){
+        setMessage(response)
+      }
+      
+     } catch (error) {
+      console.error('Error uploading file:', error);
+    }finally{
+      setDisableButton(false)
+    }
+  }
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0]
+    if (!file) 
+      return;
+    const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2 MB in bytes
+    if (file.size > MAX_FILE_SIZE) {
+        alert('File size exceeds 2 MB. Please select a smaller file.');
+        return;
+    }
+    setDisableButton(true)
+    handleFileUpload(file)
+  };
+
   return (
     <div className={styles.container}>
         {
@@ -179,6 +214,8 @@ function Chat({ loginData }) {
         </div>
 
         <div className={styles.msgInput}>
+          <input type="file" onChange={handleFileChange} />
+
           <input
             type="text"
             value={message}
@@ -186,7 +223,7 @@ function Chat({ loginData }) {
             placeholder="Type a message..."
             className={styles.input}
           />
-          <button className={styles.sendBtn} onClick={handleSendMessage}>
+          <button  disabled={disableButton} style={{ opacity: disableButton ? 0.5 : 1 }} className={styles.sendBtn} onClick={handleSendMessage}>
             Send
           </button>
         </div>
