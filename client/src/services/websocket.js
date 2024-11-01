@@ -2,7 +2,7 @@ import { io } from 'socket.io-client';
 
 let socketInstance = null;
 export const socketInit = (token) => {
-    socketInstance = new io('http://localhost:7000', {
+    socketInstance = new io('', {
         query: { accessToken: token }
     });
     handleSocketEvent(socketInstance)

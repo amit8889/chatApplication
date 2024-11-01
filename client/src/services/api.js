@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const URL = "http://localhost:7000";
+const URL = "";
 export const requestOtp = async (email) => {
   try {
     const res = await axios.post(`${URL}/user/sendOtp`, { email });
