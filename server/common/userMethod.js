@@ -89,4 +89,28 @@ const searchUser = async ({search,email}) => {
   }
 };
 
-module.exports = { addLiveUser, removeLiveUser, getSocketIdsByEmail,searchUser };
+const liveUser = async (email) => {
+  try {
+    const pool = getPool();
+    // remove current user form filter
+    const query = `
+        SELECT name,email FROM liveUser
+        WHERE status = "ONLINE"
+        AND email != ?
+    `;
+  
+    console.log(query)
+   
+    const [result] = await pool.query(query, [email]);
+    if (result.length > 0) {
+      return result;
+    }
+    return [];
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};
+
+
+module.exports = { addLiveUser, removeLiveUser, getSocketIdsByEmail,searchUser,liveUser };

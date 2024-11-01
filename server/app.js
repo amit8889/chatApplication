@@ -6,7 +6,7 @@ const multer = require('multer');
 const fs = require('fs');
 require("dotenv").config({ path: "./config/config.env" });
 const {verifyAccessToken} = require('./services/tokenService')
-
+const {validate} = require('./middleware/Auth')
 app.use(
   cors({
     origin: "*",
@@ -24,30 +24,6 @@ app.use(express.json({ extends: true, limit: "4mb" }));
 
 //===================file uploading handle===========================
 
-// validate token
-function validate(req, res, next) {
-    try {
-      const token = req.headers.authorization?.split(" ")[1];
-      
-      if (token) {
-        const isValid = verifyAccessToken(token);
-        if (isValid) {
-          return next();
-        }
-      }
-  
-      res.status(401).json({
-        message: "Invalid or missing token",
-        success: false
-      });
-    } catch (error) {
-      res.status(500).json({
-        message: error.message,
-        success: false
-      });
-    }
-  }
-  
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = "./uploads";

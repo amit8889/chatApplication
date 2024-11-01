@@ -9,19 +9,20 @@ function Sidebar({ usersAndRoom, onUserAndRoomSelect ,setSearchResult,selectedUs
   //   user.toLowerCase().includes(searchTerm.toLowerCase())
   // );
   const handleSearch = (data)=>{
-    console.log("====data searc",data)
+    //console.log("====data searc",data)
     const socket = getSocketInstance();
     if(socket && data){
       socket.emit("searchUser",data);
     }else{
-      console.log("==")
+      //console.log("==")
       setSearchResult(null)
     }
     
   }
-  useEffect(()=>{
-    console.log(usersAndRoom)
-  },[])
+  // useEffect(()=>{
+  //   console.log("===========ff>")
+  //   console.log(usersAndRoom)
+  // },[usersAndRoom])
   const debounceSearch = (search, cb, timer) => {
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);

@@ -29,4 +29,10 @@ function handleSocketEvent(socket){
 export function sendDirectMessage(data){
   socketInstance.emit("directMessage",data)
 }
-//export default socket;
+export const createGroup = async(groupName,users)=>{
+  socketInstance.emit("createRoom",{
+    roomName:groupName,
+    emails:users
+  })
+
+}

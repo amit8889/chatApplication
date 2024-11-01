@@ -1,26 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import styles from './CreateGroupPopup.module.css';
-
-const CreateGroupPopup = ({ setIsCreateGrpPopupOpen }) => {
-    const [showUsers, setShowUsers] = useState(false);
+import {getAllLiveUser} from "../../services/api.js"
+const CreateGroupPopup = ({ setIsCreateGrpPopupOpen,accessToken,handleGroupCreation }) => {
     const [groupData, setGroupData] = useState([]);
-    const [groupData1, setGroupData1] = useState([{ name: "abc", email: "abcd@gmail.com" },
-    { name: "abc", email: "abcd@gmail.com" },
-    { name: "abc", email: "abcd@gmail.com" }, { name: "abc", email: "abcd@gmail.com" }]);
-
+    const [groupName,setGroupname] = useState(null)
+    const [selectUser, setSelectedUser] = useState([]);
+    const liveUser = async()=>{
+      const users =  await getAllLiveUser(accessToken)
+      setGroupData(users?.data || [])
+    }
     useEffect(() => {
-        console.log(groupData)
-    }, [groupData]);
-    const handleShowUsers = () => {
-        setShowUsers(!showUsers);
-    }
+        if(accessToken){
+            liveUser()
+        }
+    }, []);
     const handleCreateGroup = () => {
+        // call func to handle group
+        if(!groupName?.trim() || selectUser?.length==0){
+            alert('Please select users and entre group name')
+            return;
+        }
+        handleGroupCreation(groupName,selectUser)
         setIsCreateGrpPopupOpen(false);
-        setGroupData([]);
+        
     }
 
-    const handleChange = (e) => {
-
+    const handleChange = (e,user,index) => {
+        if (e.target.checked) {
+            setSelectedUser([...selectUser, user.email]);
+        }else{
+            // remove uncheked user
+            const data = selectUser.filter(val=>val!=user.email)
+            setSelectedUser(data)
+        }
+        
+        
     }
     return (
         <div className={styles.container}>
@@ -28,30 +42,20 @@ const CreateGroupPopup = ({ setIsCreateGrpPopupOpen }) => {
                 <input
                     type="text"
                     name="groupName"
+                    value = {groupName}
                     placeholder="Enter group name..."
-                    onChange={(e) => handleChange(e)}
+                    onChange={(e) => setGroupname(e.target.value
+                    )}
                     className={styles.searchInput}
                 />
-                <input
-                    type='text'
-                    name='search'
-                    placeholder="Search users..."
-                    onChange={(e) => handleChange(e)}
-                    className={styles.searchInput}
-                />
-                <div className={styles.showUser}>
-                    <button className={styles.userBtn} onClick={e => handleShowUsers()}>{showUsers ? 'Hide...' : 'show...'}</button>
-                </div>
-                {showUsers && groupData1.map((user, index) => (
+               { groupData &&Array.isArray(groupData)&& groupData.map((user, index) => (
                     <div
                         key={index}
                         className={styles.resultItem}
-                        onClick={() => {
-                        }}
                     >
                         <input
                             type='checkbox'                           
-                            onChange={(e) => handleChange(e)}                            
+                            onChange={(e) => handleChange(e,user,index)}                            
                         /><label>{user.name}</label>
                     </div>
 

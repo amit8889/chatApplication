@@ -64,8 +64,9 @@ io.on("connection", (socket) => {
     try {
       const { roomName, emails } = data;
       const { email, name } = socket.userData;
-      const socketIds = await getSocketIdsByEmail([...emails, email],true);
+      const socketIds = await getSocketIdsByEmail([ email,...emails],true);
       const room_name = roomName; // Use unique naming if needed
+      console.log("=====>ss",socketIds)
       if (socketIds) {
         for (let socket_id of socketIds) {
           const socketData = io.sockets.sockets.get(socket_id);
@@ -79,8 +80,16 @@ io.on("connection", (socket) => {
               email: socketData.userData.email,
               name: socketData.userData.name,
             };
+            console.log("=====>3",socketIds,room_name)
+            console.log("=====>00",joinData)
+            const room = io.sockets.adapter.rooms.get(roomName);
+            if (room) {
+              const users = Array.from(room);
+              console.log("=======43=4")
+              console.log(users)
+            }
             //io.to(room_name).emit("roomJoined", joinData);
-            socket.to(room_name).emit("roomJoined", joinData);
+            io.to(room_name).emit("roomJoined", joinData);
           } else {
             console.error(`Socket ID ${socket_id?.socketId} not found.`);
           }

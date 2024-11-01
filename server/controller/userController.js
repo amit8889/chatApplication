@@ -1,5 +1,6 @@
 
 const OtpServices = require('../services/otpService')
+const {liveUser} = require("../common/userMethod")
 const TokenService = require('../services/tokenService')
 const sendOtp = async(req,res)=>{
     try {
@@ -64,4 +65,20 @@ const verifyOtp = async (req, res) => {
     }
 }
 
-module.exports = {sendOtp,verifyOtp}
+const allliveUser= async (req, res) => {
+    try {
+        const data = await liveUser(req.user.email);
+        res.status(201).json({
+            message:"live users",
+            data
+        })
+
+    }catch (error) {
+       res.status(500).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+module.exports = {sendOtp,verifyOtp,liveUser:allliveUser}

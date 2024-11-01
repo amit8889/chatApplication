@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../Sidebar/Sidebar";
-import { socketInit, sendDirectMessage } from "../../services/websocket.js";
+import { socketInit, sendDirectMessage ,createGroup} from "../../services/websocket.js";
 import { uploadFile } from "../../services/api.js";
 import styles from "./Chat.module.css";
 import SearchPopUp from "../SearchPopUp/SeachPopUp"; // Corrected import
@@ -12,8 +12,9 @@ function Chat({ loginData }) {
   const [disableButton, setDisableButton] = useState(false);
   const [messages, setMessages] = useState({ direct: {}, room: {} });
   const [selectedUser, setSelectedUser] = useState(null);
-  const [usersAndRoom, setUsersAndRoom] = useState([]);
+  const [usersAndRoom, setUsersAndRoom] = useState([])
   const [searchResult, setSearchResult] = useState(null);
+
 
   useEffect(() => {
     const socket = socketInit(loginData?.accessToken);
@@ -36,19 +37,23 @@ function Chat({ loginData }) {
         if (msg.length > 100) {
           msg.shift();
         }
-        console.log()
-        setMessages((prevMessages) => ({
-          ...prevMessages,
+        const updatedMessage ={
+          ...messages,
           direct: {
-            ...prevMessages.direct,
+            ...messages.direct,
             [data.from]: msg,
           },
-        }));
+        }
+        console.log("====updated===",updatedMessage)
+        setMessages(updatedMessage);
         const users=[...usersAndRoom]
-         const findUser = users.find(val=>val.email == data.from)
+        console.log(users)
+        console.log(data.from)
+         const findUser = users.find(val=>val.email === data.from)
          console.log("======>",findUser)
         if (!findUser) {
           console.log(usersAndRoom)
+       //   alert("test1")
           setUsersAndRoom((prev) => [...prev, { email: data.from, name: data.name }]);
         }
       });
@@ -57,12 +62,55 @@ function Chat({ loginData }) {
         console.log("=====user disconnected====", data);
         const users = [...usersAndRoom]
         console.log(users)
-        const filterUsers = users.filter(val=> val.email!=data.email)
+        const filterUsers = users.filter(val=> val.email!==data.email)
+        alert("test2")
         setUsersAndRoom(filterUsers)
       });
-    }
-  }, [loginData?.accessToken]);
 
+
+      socket.on("roomJoined",(data)=>{
+        console.log("======roomJoined come")
+        let msg = messages.room[data.roomName] || [];
+        console.log(messages)
+        msg.push({
+          email: data.email,
+          message: `room joined : ${data.name}`,
+          name: data.name,
+        });
+
+        if (msg.length > 100) {
+          msg.shift();
+        }
+        const updatedMessage ={
+          ...messages,
+          room: {
+            ...messages.room,
+            [data.roomName]: msg,
+          },
+        }
+        console.log("====updated===",updatedMessage)
+        setMessages(updatedMessage);
+        const users=[...usersAndRoom]
+        console.log(users)
+        console.log(data)
+         const findRoom = users.find(val=>val?.roomName === data.roomName)
+         console.log("======>",findRoom)
+        if (!findRoom) {
+          console.log(usersAndRoom)
+         // alert("test1")
+          setUsersAndRoom((prev) => [...prev, { roomName: data.roomName }]);
+        }
+      })
+    }
+  }, [messages,searchResult,usersAndRoom]);
+//   useEffect(()=>{
+//      console.log("message :", messages)
+//   },[messages])
+  
+
+//   useEffect(()=>{
+//     console.log("usersAndRoom :", usersAndRoom)
+//  },[usersAndRoom])
   const handleSendMessage = () => {
     if (selectedUser?.email) {
       let msg = messages.direct[selectedUser.email] || [];
@@ -93,6 +141,16 @@ function Chat({ loginData }) {
   };
 
   const onUserAndRoomSelect = (data) => {
+    const users =[...usersAndRoom]
+    // console.log(users)
+    // console.log(data)
+    const findUser = users.find(val=>val.email === data.email)
+    console.log("====77==>",findUser)
+   if (!findUser) {
+     console.log(usersAndRoom)
+     alert("test3")
+     setUsersAndRoom((prev) => [...prev, { email: data.from, name: data.name }]);
+   }
     setSelectedUser(data);
   };
 
@@ -132,16 +190,24 @@ function Chat({ loginData }) {
 
   // Define the handleSearchUser function
   const handleSearchUser = (data) => {
-    const emailExists = usersAndRoom.some(item => item.email === data.email);
+    const emailExists = usersAndRoom.find(item => item.email === data.email);
+    console.log(emailExists)
     if (!emailExists) {
+      alert("test4")
       setUsersAndRoom([...usersAndRoom, { ...data }]);
     }
+    setSelectedUser(data);
   };
+
+  const handleGroupCreation = async(groupName,groupData)=>{
+    createGroup(groupName,groupData)
+
+  }
 
   return (
     <div className={styles.container}>
       {searchResult && <SearchPopUp searchResult={searchResult} handleSearchUser={handleSearchUser} />}
-      {isCreateGrpPopupOpen && <CreateGroupPopup setIsCreateGrpPopupOpen={setIsCreateGrpPopupOpen} />}
+      {isCreateGrpPopupOpen && <CreateGroupPopup handleGroupCreation ={handleGroupCreation} accessToken= {loginData?.accessToken} setIsCreateGrpPopupOpen={setIsCreateGrpPopupOpen} />}
       <Sidebar
         usersAndRoom={usersAndRoom}
         onUserAndRoomSelect={onUserAndRoomSelect}
