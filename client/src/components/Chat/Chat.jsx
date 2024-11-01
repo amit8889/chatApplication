@@ -359,7 +359,7 @@ function Chat({ loginData }) {
             messages?.[selectedUser.roomName ? "room" : "direct"][
               selectedUser.roomName ?? selectedUser.email
             ]?.map((msg, index) => (
-              <p
+              <span
               key={index}
               className={
                 loginData.email !== msg.email
@@ -391,7 +391,7 @@ function Chat({ loginData }) {
               ) : (
                 <span>{msg.message}</span>
               )}
-            </p>
+            </span>
             ))}
         </div>
 

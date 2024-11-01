@@ -67,8 +67,8 @@ app.get("/test", (req, res) => {
   });
 });
 // static file render
-app.use(express.static(path.join(__dirname, "./public")));
+app.use(express.static(path.join(__dirname, "../client/build")));
 app.get("*", async (req, res) => {
-  res.sendFile(path.resolve(__dirname, "./public/index.html"));
+  res.sendFile(path.resolve(__dirname, "../client/build/index.html"));
 });
 module.exports = app;

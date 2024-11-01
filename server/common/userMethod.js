@@ -48,7 +48,7 @@ const getSocketIdsByEmail = async (email,isMulti) => {
     const query = `
         SELECT socketId FROM liveUser
         WHERE email IN (?)
-        AND status = "ONLINE"
+        AND status = 'ONLINE'
         `;
     const data = [email];
     const [result] = await pool.query(query, data);
@@ -71,7 +71,7 @@ const searchUser = async ({search,email}) => {
     // remove current user form filter
     const query = `
         SELECT name,email FROM liveUser
-        WHERE status = "ONLINE"
+        WHERE status = 'ONLINE'
         AND (email LIKE ? OR name LIKE ?)
         AND email != ?
     `;
@@ -95,7 +95,7 @@ const liveUser = async (email) => {
     // remove current user form filter
     const query = `
         SELECT name,email FROM liveUser
-        WHERE status = "ONLINE"
+        WHERE status = 'ONLINE'
         AND email != ?
     `;
   
