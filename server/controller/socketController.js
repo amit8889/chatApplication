@@ -15,7 +15,6 @@ io.use(async (socket, next) => {
       if (!userData) {
           throw new Error("Authentication error");
       }
-      console.log(userData);
       // Attach user data to socket for further use
       socket.userData = userData;
       next();
@@ -37,8 +36,6 @@ io.on("connection", (socket) => {
       if (socketId) {
           // to prevent from same room name and socked id
           const targetSocket = io.sockets.sockets.get(socketId);
-          // console.log(targetSocket)
-          console.log({ from: email, message: data.message })
           if (targetSocket) {
               targetSocket.emit("directMessage", { from: email, name: name, message: data.message });
           } else {
@@ -54,8 +51,6 @@ io.on("connection", (socket) => {
       const { email } = socket.userData;
       console.log("====search event come==", data)
       const liveUser = await searchUser({ search: data, email: email });
-      console.log("live")
-      console.log(liveUser)
       socket.emit("searchUser", liveUser);
   });
 
@@ -65,8 +60,7 @@ io.on("connection", (socket) => {
           const { roomName, emails } = data;
           const { email, name } = socket.userData;
           const socketIds = await getSocketIdsByEmail([email, ...emails], true);
-          const room_name = roomName; // Use unique naming if needed
-          console.log("=====>ss", socketIds)
+          const room_name = roomName;
           if (socketIds) {
               for (let socket_id of socketIds) {
                   const socketData = io.sockets.sockets.get(socket_id);
@@ -75,21 +69,12 @@ io.on("connection", (socket) => {
                       if (!socketData.roomsJoined) {
                           socketData.roomsJoined = [];
                       }
+                      socketData.roomsJoined.push(room_name);
                       const joinData = {
                           roomName: room_name,
                           email: socketData.userData.email,
                           name: socketData.userData.name,
                       };
-                      console.log("joinData", joinData);
-                      console.log("=====>3", socketIds, room_name)
-                      console.log("=====>00", joinData)
-                      const room = io.sockets.adapter.rooms.get(roomName);
-                      if (room) {
-                          const users = Array.from(room);
-                          console.log("=======43=4")
-                          console.log(users)
-                      }
-                      //io.to(room_name).emit("roomJoined", joinData);
                       io.to(room_name).emit("roomJoined", joinData);
                   } else {
                       console.error(`Socket ID ${socket_id?.socketId} not found.`);
@@ -105,54 +90,14 @@ io.on("connection", (socket) => {
   // send message to room
   socket.on("messageSendToRoom", async (data) => {
       const { roomName, message } = data;
-      console.log("------------------data--------------------", data);
-      console.log("--------roomname-----------", roomName);
-      console.log("socket", socket);
       const room = io.sockets.adapter.rooms;
-      console.log("room", room);
-      // io.to(roomName).emit("messageSendToRoom", {
-      //     roomName: roomName,
-      //     message: message,
-      //     email: socket.userData.email,
-      //     name: socket.userData.name,
-      // });
-      // io.to('group').emit("roomJoined", data);
-      io.to(roomName).emit("testing", {
+      socket.to(roomName).emit("roomMessage", {
           roomName: roomName,
           message: message,
           email: socket.userData.email,
           name: socket.userData.name,
       });
   });
-  //   socket.on("roomJoin", (data) => {
-  //     const { roomName, email, name } = data;
-  //     socket.join(roomName);
-  //     if (!socket.roomsJoined) {
-  //       socket.roomsJoined = [];
-  //     }
-  //     socket.roomsJoined.push(roomName);
-  //     socket.to(roomName).emit("roomJoin", {
-  //       roomName: roomName,
-  //       email: email,
-  //       name: name,
-  //     });
-  //   });
-  socket.on("leaveRoom", async (data) => {
-      const { roomName } = data;
-      socket.leave(roomName);
-      if (socket.roomsJoined) {
-          const index = socket.roomsJoined.indexOf(roomName);
-          if (index > -1) {
-              socket.roomsJoined.splice(index, 1);
-          }
-          socket.to(roomName).emit("leaveRoom", {
-              roomName: roomName,
-              email: email,
-              name: name,
-          });
-      }
-  });
-
   socket.on("disconnect", () => {
       console.log("user disconnected");
       const userData = {
@@ -167,11 +112,11 @@ io.on("connection", (socket) => {
                   email: userData.email,
                   name: userData.name,
               };
-              io.to(roomName).emit("roomLeave", leaveData);
+              console.log("leab",leaveData)
+              io.to(roomName).emit("userDisconnected", leaveData);
           }
       }
-      removeLiveUser({ email: userData.email });
-      // also fire event to group when user diconnect or join a group
+      removeLiveUser({ email: userData.email })
   });
 });
 

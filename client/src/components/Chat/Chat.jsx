@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Sidebar from "../Sidebar/Sidebar";
 import {
   socketInit,
@@ -19,296 +19,182 @@ function Chat({ loginData }) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [usersAndRoom, setUsersAndRoom] = useState([]);
   const [searchResult, setSearchResult] = useState(null);
-  // const[socket,setSocket] = useState(null);
+  const [socket, setSocket] = useState(null);
   const ref = useRef(false);
-  const handleDirectMessage = (data) => {
+
+  // Initialize socket
+  useEffect(() => {
+    ref.current = socketInit(loginData?.accessToken);
+    setSocket(ref.current);
+
+    return () => {
+      ref.current?.disconnect();
+    };
+  }, [loginData?.accessToken]);
+
+  const handleRoomJoin = useCallback(
+    (data) => {
+      setMessages((prevMessages) => {
+        let msg = prevMessages.room[data.roomName] || [];
+        console.log(prevMessages);
+        msg.push({
+          email: data.email,
+          message: `room joined`,
+          name: data.name,
+        });
+
+        if (msg.length > 100) {
+          msg.shift();
+        }
+
+        return {
+          ...prevMessages,
+          room: {
+            ...prevMessages.room,
+            [data.roomName]: msg,
+          },
+        };
+      });
+
+      setUsersAndRoom((prevUsers) => {
+        const findRoom = prevUsers.find(
+          (val) => val?.roomName === data.roomName
+        );
+        //console.log("======>", findRoom);
+        if (!findRoom) {
+          console.log(usersAndRoom);
+          return [...prevUsers, { roomName: data.roomName }];
+        }
+        return prevUsers;
+      });
+    },
+    [usersAndRoom]
+  ); // Add dependencies if needed
+  const handleRoomMessage = useCallback((data) => {
+    console.log("data", data);
+    //console.log("=====room message data====", data);
+
+    setMessages((prevMessages) => {
+      const msg = prevMessages.room[data.roomName] || [];
+      console.log(prevMessages);
+      msg.push({
+        email: data.email,
+        message: data.message,
+        name: data.name,
+      });
+
+      if (msg.length > 100) {
+        msg.shift();
+      }
+
+      return {
+        ...prevMessages,
+        room: {
+          ...prevMessages.room,
+          [data.roomName]: msg,
+        },
+      };
+    });
+
+    setUsersAndRoom((prevUsers) => {
+      const userExists = prevUsers.find(
+        (val) => val?.roomName === data.roomName
+      );
+      console.log("======>", userExists);
+      if (!userExists) {
+        console.log(prevUsers);
+        return [...prevUsers, { roomName: data.roomName }];
+      }
+      return prevUsers;
+    });
+  }, []);
+  const handleDirectMessage = useCallback((data) => {
     console.log("=====direct message data====", data);
-    let msg = messages.direct[data.from] || [];
-    console.log(messages);
-    msg.push({
-      email: data.from,
-      message: data.message,
-      name: data.name,
+    setMessages((prevMessages) => {
+      const msg = prevMessages.direct[data.from] || [];
+      const updatedMessages = [
+        ...msg,
+        {
+          email: data.from,
+          message: data.message,
+          name: data.name,
+        },
+      ];
+
+      if (updatedMessages.length > 100) {
+        updatedMessages.shift();
+      }
+
+      return {
+        ...prevMessages,
+        direct: {
+          ...prevMessages.direct,
+          [data.from]: updatedMessages,
+        },
+      };
     });
 
-    if (msg.length > 100) {
-      msg.shift();
-    }
-    const updatedMessage = {
-      ...messages,
-      direct: {
-        ...messages.direct,
-        [data.from]: msg,
-      },
-    };
-    console.log("====updated===", updatedMessage);
-    setMessages(updatedMessage);
-    const users = [...usersAndRoom];
-    console.log(users);
-    console.log(data.from);
-    const findUser = users.find((val) => val.email === data.from);
-    console.log("======>", findUser);
-    if (!findUser) {
-      console.log(usersAndRoom);
-      //   alert("test1")
-      setUsersAndRoom((prev) => [
-        ...prev,
-        { email: data.from, name: data.name },
-      ]);
-    }
-  };
+    setUsersAndRoom((prev) => {
+      const userExists = prev.some((val) => val.email === data.from);
+      return userExists
+        ? prev
+        : [...prev, { email: data.from, name: data.name }];
+    });
+  }, []);
 
-  const handleuserDisconnected = (data) => {
+  const handleUserDisconnected = useCallback((data) => {
     console.log("=====user disconnected====", data);
-    const users = [...usersAndRoom];
-    console.log(users);
-    const filterUsers = users.filter((val) => val.email !== data.email);
-    alert("test2");
-    setUsersAndRoom(filterUsers);
-  };
+    setMessages((prevMessages) => {
+      let msg = prevMessages.room[data.roomName] || [];
+      console.log(prevMessages);
+      msg.push({
+        email: data.email,
+        message: `room leav`,
+        name: data.name,
+      });
 
-  const handleRoomJoin = (data) => {
-    console.log("======roomJoined come");
-    let msg = messages.room[data.roomName] || [];
-    console.log(messages);
-    msg.push({
-      email: data.email,
-      message: `room joined : ${data.name}`,
-      name: data.name,
+      if (msg.length > 100) {
+        msg.shift();
+      }
+
+      return {
+        ...prevMessages,
+        room: {
+          ...prevMessages.room,
+          [data.roomName]: msg,
+        },
+      };
     });
-
-    if (msg.length > 100) {
-      msg.shift();
+    if (!data.roomName) {
+      setUsersAndRoom((prevUsers) => {
+        return prevUsers.filter((val) => val?.email === data.email);
+      });
     }
-    const updatedMessage = {
-      ...messages,
-      room: {
-        ...messages.room,
-        [data.roomName]: msg,
-      },
-    };
-    console.log("====updated===", updatedMessage);
-    setMessages(updatedMessage);
-    const users = [...usersAndRoom];
-    console.log(users);
-    console.log(data);
-    const findRoom = users.find((val) => val?.roomName === data.roomName);
-    console.log("======>", findRoom);
-    if (!findRoom) {
-      console.log(usersAndRoom);
-      // alert("test1")
-      setUsersAndRoom((prev) => [...prev, { roomName: data.roomName }]);
-    }
-  };
+  }, []);
 
-  const handleSearch = (data) => {
+  const handleSearch = useCallback((data) => {
     console.log("=====search user data====", data);
     setSearchResult(data);
-  };
-
-  const handleRoomMessage = (data) => {
-    console.log("data", data);
-    console.log("=====room message data====", data);
-    let msg = messages.room[data.roomName] || [];
-    console.log(messages);
-    msg.push({
-      email: data.email,
-      message: data.message,
-      name: data.name,
-    });
-
-    if (msg.length > 100) {
-      msg.shift();
-    }
-    const updatedMessage = {
-      ...messages,
-      room: {
-        ...messages.room,
-        [data.roomName]: msg,
-      },
-    };
-    console.log("====updated===", updatedMessage);
-    setMessages(updatedMessage);
-    const users = [...usersAndRoom];
-    console.log(users);
-    console.log(data.from);
-    const findUser = users.find((val) => val?.roomName === data.roomName);
-    console.log("======>", findUser);
-    if (!findUser) {
-      console.log(usersAndRoom);
-      //   alert("test1")
-      setUsersAndRoom((prev) => [...prev, { roomName: data.roomName }]);
-    }
-  };
+  }, []);
   useEffect(() => {
-  
-
-    if (!ref.current) {
-      ref.current = socketInit(loginData?.accessToken);
+    if (!socket) {
+      return;
     }
-    let socket = ref.current;
-
     console.log("====================eve================");
-
-    socket.on("searchUser", (data) => handleSearch(data));
-    socket.on("directMessage", (data) => handleDirectMessage(data));
-    socket.on("userDisconnected", (data) => handleuserDisconnected(data));
-    socket.on("roomJoined", (data) => handleRoomJoin(data));
-    //socket.on("sendToRoom", handleRoomMessage);
-
-    socket.on("testing", (data) => {
-      console.log(data);
-      handleRoomMessage(data);
-    });
+    socket.on("searchUser", handleSearch);
+    socket.on("directMessage", handleDirectMessage);
+    socket.on("userDisconnected", handleUserDisconnected);
+    socket.on("roomJoined", handleRoomJoin);
+    socket.on("roomMessage", handleRoomMessage);
 
     return () => {
       socket.off("searchUser", handleSearch);
       socket.off("directMessage", handleDirectMessage);
-      socket.off("userDisconnected", handleuserDisconnected);
+      socket.off("userDisconnected", handleUserDisconnected);
       socket.off("roomJoined", handleRoomJoin);
-      //  socket.off("sendToRoom", handleRoomMessage)
-      socket.off("testing", (data) => {
-        console.log(data);
-        handleRoomMessage(data);
-      });
+      socket.off("roomMessage", handleRoomMessage);
     };
-  }, [loginData?.accessToken, message, messages, usersAndRoom]);
-
-  // useEffect(() => {
-
-  //       const socket = socketInit(loginData?.accessToken);
-  //       console.log("====================eve================")
-
-  //         socket.on("searchUser",(data) => {
-  //           console.log("=====search user data====", data);
-  //           setSearchResult(data);
-  //       });
-  //         socket.on("directMessage", (data) => {
-  //           console.log("=====direct message data====", data);
-  //           let msg = messages.direct[data.from] || [];
-  //           console.log(messages)
-  //           msg.push({
-  //               email: data.from,
-  //               message: data.message,
-  //               name: data.name,
-  //           });
-
-  //           if (msg.length > 100) {
-  //               msg.shift();
-  //           }
-  //           const updatedMessage = {
-  //               ...messages,
-  //               direct: {
-  //                   ...messages.direct,
-  //                   [data.from]: msg,
-  //               },
-  //           }
-  //           console.log("====updated===", updatedMessage)
-  //           setMessages(updatedMessage);
-  //           const users = [...usersAndRoom]
-  //           console.log(users)
-  //           console.log(data.from)
-  //           const findUser = users.find(val => val.email === data.from)
-  //           console.log("======>", findUser)
-  //           if (!findUser) {
-  //               console.log(usersAndRoom)
-  //               //   alert("test1")
-  //               setUsersAndRoom((prev) => [...prev, { email: data.from, name: data.name }]);
-  //           }
-  //       }
-  //     );
-  //         socket.on("userDisconnected", (data) => {
-  //           console.log("=====user disconnected====", data);
-  //           const users = [...usersAndRoom]
-  //           console.log(users)
-  //           const filterUsers = users.filter(val => val.email !== data.email)
-  //           alert("test2")
-  //           setUsersAndRoom(filterUsers)
-  //       });
-  //         socket.on("roomJoined",  (data) => {
-  //           console.log("======roomJoined come");
-  //           let msg = messages.room[data.roomName] || [];
-  //           console.log(messages)
-  //           msg.push({
-  //               email: data.email,
-  //               message: `room joined : ${data.name}`,
-  //               name: data.name,
-  //           });
-
-  //           if (msg.length > 100) {
-  //               msg.shift();
-  //           }
-  //           const updatedMessage = {
-  //               ...messages,
-  //               room: {
-  //                   ...messages.room,
-  //                   [data.roomName]: msg,
-  //               },
-  //           }
-  //           console.log("====updated===", updatedMessage)
-  //           setMessages(updatedMessage);
-  //           const users = [...usersAndRoom]
-  //           console.log(users)
-  //           console.log(data)
-  //           const findRoom = users.find(val => val?.roomName === data.roomName)
-  //           console.log("======>", findRoom)
-  //           if (!findRoom) {
-  //               console.log(usersAndRoom)
-  //               // alert("test1")
-  //               setUsersAndRoom((prev) => [...prev, { roomName: data.roomName }]);
-  //           }
-  //       });
-  //         //socket.on("sendToRoom", handleRoomMessage);
-
-  //         socket.on('testing', (data) => {
-  //           console.log("data", data);
-  //           console.log("=====room message data====", data);
-  //           let msg = messages.room[data.roomName] || [];
-  //           console.log(messages)
-  //           msg.push({
-  //               email: data.email,
-  //               message: data.message,
-  //               name: data.name,
-  //           });
-
-  //           if (msg.length > 100) {
-  //               msg.shift();
-  //           }
-  //           const updatedMessage = {
-  //               ...messages,
-  //               room: {
-  //                   ...messages.room,
-  //                   [data.roomName]: msg,
-  //               },
-  //           }
-  //           console.log("====updated===", updatedMessage)
-  //           setMessages(updatedMessage);
-  //           const users = [...usersAndRoom]
-  //           console.log(users)
-  //           console.log(data.from)
-  //           const findUser = users.find(val => val?.roomName === data.roomName)
-  //           console.log("======>", findUser)
-  //           if (!findUser) {
-  //               console.log(usersAndRoom)
-  //               //   alert("test1")
-  //               setUsersAndRoom((prev) => [...prev, {roomName:data.roomName }]);
-  //           }
-  //       });
-
-  //     // return () => {
-
-  //     //     socket.off("searchUser", handleSearch);
-  //     //     socket.off("directMessage", handleDirectMessage);
-  //     //     socket.off("userDisconnected", handleuserDisconnected);
-  //     //     socket.off('roomJoined', handleRoomJoin);
-  //     //   //  socket.off("sendToRoom", handleRoomMessage)
-  //     //     socket.off('testing', (data) => {
-  //     //       console.log(data)
-  //     //       handleRoomMessage(data)
-  //     //   });
-
-  //   //}
-  // }, [loginData?.accessToken, messages, usersAndRoom]);
+  }, [socket, handleSearch, handleDirectMessage, handleUserDisconnected]);
 
   const handleSendMessage = () => {
     if (!handleSendMessage) {
@@ -435,6 +321,16 @@ function Chat({ loginData }) {
     createGroup(groupName, groupData);
   };
 
+
+  const isValidURL = (urlString) => {
+    try {
+      new URL(urlString);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  };
+
   return (
     <div className={styles.container}>
       {searchResult && (
@@ -464,15 +360,38 @@ function Chat({ loginData }) {
               selectedUser.roomName ?? selectedUser.email
             ]?.map((msg, index) => (
               <p
-                key={index}
-                className={
-                  loginData.email !== msg.email
-                    ? styles.ownMessage
-                    : styles.message
-                }
-              >
-                <strong>{msg.name}:</strong> {msg.message}
-              </p>
+              key={index}
+              className={
+                loginData.email !== msg.email
+                  ? styles.ownMessage
+                  : styles.message
+              }
+            >
+              <strong>{msg.name}:</strong>
+              {msg.message && isValidURL(msg.message) ? (
+                <>
+                  <div style={{ marginTop: '5px' }}>
+                    <iframe
+                      src={msg.message}
+                      width="300" // Adjust width for better visibility
+                      height="200" // Adjust height for better visibility
+                      title="URL Preview"
+                      style={{ border: 'none' }}
+                    />
+                  </div>
+                  <a 
+                    style={{ cursor: "pointer", textDecoration: 'none', color: 'blue',opacity:1 }} 
+                    href={msg.message} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    Download 
+                  </a>
+                </>
+              ) : (
+                <span>{msg.message}</span>
+              )}
+            </p>
             ))}
         </div>
 
