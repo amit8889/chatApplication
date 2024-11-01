@@ -201,6 +201,11 @@ function Chat({ loginData }) {
       alert("Please select group or person ");
       return;
     }
+    if(!message || !message.trim()){
+      alert("Please enter message");
+      return;
+    }
+    
     if (selectedUser?.email) {
       let msg = messages.direct[selectedUser.email] || [];
       msg.push({
