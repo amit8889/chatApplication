@@ -1,5 +1,4 @@
 const socketIo = require('socket.io');
-
 let io = null;
 const socketInit =(appServer)=>{
      io = socketIo(appServer,{cors: {
@@ -11,4 +10,9 @@ const getSocketInstance = ()=>{
     return io;
 };
 
-module.exports= {socketInit,getSocketInstance}
+const disconnetAllSocket = ()=>{
+  io.sockets.sockets.forEach((socketData,id) => {
+    socketData.disconnect()
+  });
+}
+module.exports= {socketInit,getSocketInstance,disconnetAllSocket}

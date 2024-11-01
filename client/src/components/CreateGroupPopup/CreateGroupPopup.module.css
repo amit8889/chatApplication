@@ -1,0 +1,74 @@
+.container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);      
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .popup {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    width: 300px;
+    max-height: fit-content;
+    overflow-y: auto;
+    position: relative;
+  } 
+  
+  .resultItem {
+    display: flex;
+    padding-left: 10px;
+    border-radius: 5px;    
+    border-bottom: 1px solid #ddd;
+    align-items: start;     
+  }
+  
+  .resultItem:last-child {
+    border-bottom: none;
+  }
+
+  .creategroupbutton{
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: end;
+    gap:10px;
+    margin-right: 10px;
+    margin-top: 10px;
+  }
+
+  .btn{
+    color: white;   
+    border-radius: 5px;
+    background-color: #928d8d;
+    outline: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .searchInput {
+    width: 90%;
+    padding: 5px;
+    /* margin-top: 10px; */
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    outline: white;
+  }
+
+  .userBtn{
+    border: none;
+    outline: none;
+    background-color: transparent;
+    cursor:pointer;
+    font-size: 10px;
+  }
+
+  .showUser{
+    display: flex;
+    justify-content: end;
+  }

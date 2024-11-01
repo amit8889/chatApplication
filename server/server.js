@@ -10,7 +10,8 @@ require('./controller/socketController')
 
 
 //initalize db connecton
-
+const {connectSql} = require('./connection/dbConnection')
+connectSql()
 const PORT = process.env.PORT || 8000
 //server initalization
 server.listen(PORT,()=>{
