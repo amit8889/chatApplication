@@ -263,7 +263,7 @@ function Chat({ loginData }) {
     console.log(data);
     if (!findUser) {
       console.log(usersAndRoom);
-      alert("test3");
+      //alert("test3");
       setUsersAndRoom((prev) => [
         ...prev,
         { email: data.from, name: data.name },
@@ -311,7 +311,7 @@ function Chat({ loginData }) {
     const emailExists = usersAndRoom.find((item) => item.email === data.email);
     console.log(emailExists);
     if (!emailExists) {
-      alert("test4");
+      //alert("test4");
       setUsersAndRoom([...usersAndRoom, { ...data }]);
     }
     setSelectedUser(data);
