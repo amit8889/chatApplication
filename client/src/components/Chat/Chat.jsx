@@ -45,7 +45,6 @@ function Chat({ loginData }) {
     (data) => {
       setMessages((prevMessages) => {
         let msg = prevMessages.room[data.roomName] || [];
-        console.log(prevMessages);
         msg.push({
           email: data.email,
           message: `room joined`,
@@ -69,9 +68,7 @@ function Chat({ loginData }) {
         const findRoom = prevUsers.find(
           (val) => val?.roomName === data.roomName
         );
-        //console.log("======>", findRoom);
         if (!findRoom) {
-          console.log(usersAndRoom);
           return [...prevUsers, { roomName: data.roomName }];
         }
         return prevUsers;
@@ -80,12 +77,9 @@ function Chat({ loginData }) {
     [usersAndRoom]
   ); // Add dependencies if needed
   const handleRoomMessage = useCallback((data) => {
-    console.log("data", data);
-    //console.log("=====room message data====", data);
 
     setMessages((prevMessages) => {
       const msg = prevMessages.room[data.roomName] || [];
-      console.log(prevMessages);
       msg.push({
         email: data.email,
         message: data.message,
@@ -105,20 +99,19 @@ function Chat({ loginData }) {
       };
     });
 
-    setUsersAndRoom((prevUsers) => {
-      const userExists = prevUsers.find(
-        (val) => val?.roomName === data.roomName
-      );
-      console.log("======>", userExists);
-      if (!userExists) {
-        console.log(prevUsers);
-        return [...prevUsers, { roomName: data.roomName }];
-      }
-      return prevUsers;
-    });
+    // setUsersAndRoom((prevUsers) => {
+    //   const userExists = prevUsers.find(
+    //     (val) => val?.roomName === data.roomName
+    //   );
+    //   console.log("======>", userExists);
+    //   if (!userExists) {
+    //     console.log(prevUsers);
+    //     return [...prevUsers, { roomName: data.roomName }];
+    //   }
+    //   return prevUsers;
+    // });
   }, []);
   const handleDirectMessage = useCallback((data) => {
-    console.log("=====direct message data====", data);
     setMessages((prevMessages) => {
       const msg = prevMessages.direct[data.from] || [];
       const updatedMessages = [
@@ -152,10 +145,8 @@ function Chat({ loginData }) {
   }, []);
 
   const handleUserDisconnected = useCallback((data) => {
-    console.log("=====user disconnected====", data);
     setMessages((prevMessages) => {
       let msg = prevMessages.room[data.roomName] || [];
-      console.log(prevMessages);
       msg.push({
         email: data.email,
         message: `room leav`,
@@ -182,18 +173,14 @@ function Chat({ loginData }) {
   }, []);
 
   const handleSearch = useCallback((data) => {
-    console.log("=====search user data====", data);
     setSearchResult(data);
   }, []);
 
-  useEffect(() => {
-    console.log("rr----", searchResult);
-  }, [searchResult]);
+
   useEffect(() => {
     if (!socket) {
       return;
     }
-    console.log("====================eve================");
     socket.on("searchUser", handleSearch);
     socket.on("directMessage", handleDirectMessage);
     socket.on("userDisconnected", handleUserDisconnected);
@@ -274,14 +261,8 @@ function Chat({ loginData }) {
 
   const onUserAndRoomSelect = (data) => {
     const users = [...usersAndRoom];
-    // console.log(users)
-    // console.log(data)
     const findUser = users.find((val) => val.email === data.email);
-    console.log("====77==>", findUser);
-    console.log(data);
     if (!findUser) {
-      console.log(usersAndRoom);
-      //alert("test3");
       setUsersAndRoom((prev) => [
         ...prev,
         { email: data.from, name: data.name },
@@ -327,9 +308,7 @@ function Chat({ loginData }) {
   // Define the handleSearchUser function
   const handleSearchUser = (data) => {
     const emailExists = usersAndRoom.find((item) => item.email === data.email);
-    console.log(emailExists);
     if (!emailExists) {
-      //alert("test4");
       setUsersAndRoom([...usersAndRoom, { ...data }]);
     }
     setSelectedUser(data);
@@ -347,9 +326,7 @@ function Chat({ loginData }) {
       return false;
     }
   };
-  useEffect(() => {
-    console.log("===changed''====");
-  }, [usersAndRoom]);
+
   return (
     <Box className={styles.container}>
       {/* Navbar */}
