@@ -9,11 +9,12 @@ class OtpService{
         return  crypto.createHmac('sha256',process.env.Hash_SECRET).update(data).digest('hex')
     }
     async sendOtpByEmail(email,otp,expireTime){
-        const options={
-            email:email,
-            subject:"Chat app otp verification",
-            message:`You chat app opt is ${otp}. Valid for ${expireTime} minutes.`
-        }
+        const options = {
+            email: email,
+            subject: "OTP Verification for Chat App",
+            message: `Your OTP for the Chat App is ${otp}. It is valid for ${expireTime} minutes. Please use it to verify your account.`
+        };
+        
         await Email.sendEmail(options)
     }
     async VerifyOtp(hashotp,otp){

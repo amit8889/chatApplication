@@ -49,7 +49,6 @@ io.on("connection", (socket) => {
   //search user
   socket.on("searchUser", async (data) => {
       const { email } = socket.userData;
-      console.log("====search event come==", data)
       const liveUser = await searchUser({ search: data, email: email });
       socket.emit("searchUser", liveUser);
   });
@@ -112,7 +111,6 @@ io.on("connection", (socket) => {
                   email: userData.email,
                   name: userData.name,
               };
-              console.log("leab",leaveData)
               io.to(roomName).emit("userDisconnected", leaveData);
           }
       }

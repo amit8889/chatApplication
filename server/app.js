@@ -43,9 +43,8 @@ app.post("/upload", validate, upload.single("media"), (req, res) => {
     return res.status(400).json({ error: "No file uploaded" });
   }
   // Generate file URL
-  const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${
-    req.file.filename
-  }`;
+  const fileUrl = `${process.env.ENVIRONMENT === "DEV" ? req.protocol : "https"}://${req.get("host")}/uploads/${req.file.filename}`;
+
   res.json({ fileUrl });
 });
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
