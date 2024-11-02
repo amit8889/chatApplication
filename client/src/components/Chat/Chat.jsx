@@ -184,10 +184,8 @@ function Chat({ loginData }) {
         return prevUsers.filter((val) => val?.email === data.email);
       });
     }
-    console.log(data)
-    console.log(selectedUser)
-    if(data?.remove){
-      setSelectedUser(null)
+    if (data?.remove) {
+      setSelectedUser(null);
     }
   }, []);
 
@@ -351,7 +349,16 @@ function Chat({ loginData }) {
       sx={{ display: "flex", flexDirection: "column", height: "100vh" }}
     >
       {/* Navbar */}
-      <AppBar position="static" sx={{ backgroundColor: "#007bff" }}>
+      <AppBar
+  position={window.innerWidth < 700 ? "absolute" : "static"}
+  sx={{
+    width: "100%",
+    marginBottom: window.innerWidth < 700 ? "30px" : 0,
+    backgroundColor: "#007bff",
+  }}
+>
+
+
         <Toolbar
           sx={{
             display: "flex",
@@ -476,89 +483,92 @@ function Chat({ loginData }) {
             elevation={3}
             sx={{ flex: 1, overflowY: "auto", padding: 2 }}
           >
-{!selectedUser ? (
-  <Box sx={{ textAlign: "center", padding: "20px" }}>
-  
-  <Typography
-    sx={{
-      color: "#6c757d",
-      fontStyle: "italic",
-      fontSize: "16px",
-    }}
-  >
-    Select a user or room to start chatting
-    <br />
-    Search them by their name
-    <br />
-    <span style={{ fontWeight: "bold" }}>{ window.innerWidth<780 && "Click on the top-left button"}</span>
-  </Typography>
-</Box>
-) : (
-  messages?.[selectedUser.roomName ? "room" : "direct"][
-    selectedUser.roomName ?? selectedUser.email
-  ]?.map((msg, index) => (
-    <Box
-      key={index}
-      sx={{
-        display: "flex",
-        justifyContent:
-          loginData.email === msg.email ? "flex-end" : "flex-start",
-        mb: 1,
-      }}
-    >
-      <Typography
-        className={
-          loginData.email === msg.email
-            ? styles.ownMessage
-            : styles.otherMessage
-        }
-        sx={{
-          maxWidth: "60%",
-          borderRadius: "10px",
-          padding: "8px",
-          backgroundColor:
-            loginData.email === msg.email ? "#d1e7dd" : "#f8d7da",
-          color: loginData.email === msg.email ? "#0f5132" : "#721c24",
-        }}
-      >
-        <strong>{msg.name}:</strong>
-        {msg.message && isValidURL(msg.message) ? (
-          <>
-            <Box sx={{ mt: 1 }}>
-              <iframe
-                src={msg.message}
-                width="300"
-                height="200"
-                title="URL Preview"
-                style={{
-                  border: "none",
-                  maxWidth: "100%",
-                  height: "auto",
-                }}
-              />
-            </Box>
-            <a
-              style={{
-                cursor: "pointer",
-                textDecoration: "none",
-                color: "blue",
-                opacity: 1,
-              }}
-              href={msg.message}
-              target="_blank"
-              rel="noopener noreferrer"
-              download
-            >
-              Download
-            </a>
-          </>
-        ) : (
-          <span style={{ maxWidth: "50vh" }}>{msg.message}</span>
-        )}
-      </Typography>
-    </Box>
-  )
-              ))}
+            {!selectedUser ? (
+              <Box sx={{ textAlign: "center", padding: "20px" }}>
+                <Typography
+                  sx={{
+                    color: "#6c757d",
+                    fontStyle: "italic",
+                    fontSize: "16px",
+                    marginTop:"3rem"
+                  }}
+                >
+                  Select a user or room to start chatting
+                  <br />
+                  Search them by their name
+                  <br />
+                  <span style={{ fontWeight: "bold" }}>
+                    {window.innerWidth < 780 && "Click on the top-left button"}
+                  </span>
+                </Typography>
+              </Box>
+            ) : (
+              messages?.[selectedUser.roomName ? "room" : "direct"][
+                selectedUser.roomName ?? selectedUser.email
+              ]?.map((msg, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    display: "flex",
+                    justifyContent:
+                      loginData.email === msg.email ? "flex-end" : "flex-start",
+                    mb: 1,
+                  }}
+                >
+                  <Typography
+                    className={
+                      loginData.email === msg.email
+                        ? styles.ownMessage
+                        : styles.otherMessage
+                    }
+                    sx={{
+                      maxWidth: "60%",
+                      borderRadius: "10px",
+                      padding: "8px",
+                      backgroundColor:
+                        loginData.email === msg.email ? "#d1e7dd" : "#f8d7da",
+                      color:
+                        loginData.email === msg.email ? "#0f5132" : "#721c24",
+                    }}
+                  >
+                    <strong>{msg.name}:</strong>
+                    {msg.message && isValidURL(msg.message) ? (
+                      <>
+                        <Box sx={{ mt: 1 }}>
+                          <iframe
+                            src={msg.message}
+                            width="300"
+                            height="200"
+                            title="URL Preview"
+                            style={{
+                              border: "none",
+                              maxWidth: "100%",
+                              height: "auto",
+                            }}
+                          />
+                        </Box>
+                        <a
+                          style={{
+                            cursor: "pointer",
+                            textDecoration: "none",
+                            color: "blue",
+                            opacity: 1,
+                          }}
+                          href={msg.message}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download
+                        >
+                          Download
+                        </a>
+                      </>
+                    ) : (
+                      <span style={{ maxWidth: "50vh" }}>{msg.message}</span>
+                    )}
+                  </Typography>
+                </Box>
+              ))
+            )}
             <div ref={messagesEndRef} />
           </Paper>
 
