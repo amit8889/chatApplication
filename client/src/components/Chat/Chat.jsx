@@ -476,7 +476,7 @@ function Chat({ loginData }) {
         {/* Main Content */}
         <Box
           className={styles.main}
-          sx={{ flex: 1, display: "flex", flexDirection: "column" }}
+          sx={{ flex: 1, display: "flex", flexDirection: "column" , marginTop: window.innerWidth < 700 ? "3rem" : 0,  marginBottom:window.innerWidth ?"42px" : 0}}
         >
           <Paper
             className={styles.messages}
@@ -511,8 +511,7 @@ function Chat({ loginData }) {
                 sx={{
                   display: "flex",
                   justifyContent: loginData.email === msg.email ? "flex-end" : "flex-start",
-                  mb: 1,
-                  marginTop: window.innerWidth < 700 ? "3rem" : 0,
+                  mb: 1
                 }}
               >
               
