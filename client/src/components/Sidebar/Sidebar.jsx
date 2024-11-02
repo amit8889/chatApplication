@@ -40,6 +40,7 @@ function Sidebar({ usersAndRoom, onUserAndRoomSelect, setSearchResult, selectedU
                         onClick={() => onUserAndRoomSelect(data)}
                         selected={(selectedUser?.email || selectedUser?.roomName) === (data.email || data.roomName)}
                         className={styles.userItem}
+                        
                     >
                         <ListItemText
                             primary={data?.name ? data.name : data.roomName}

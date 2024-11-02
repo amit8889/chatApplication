@@ -1,8 +1,10 @@
 .sidebar {
-  width: 250px;
+  min-width: 224px; /* Fixed width for desktop */
   padding: 16px;
   display: flex;
   flex-direction: column;
+  width:fit-content;
+  margin-top: .2rem;
 }
 
 .searchInput {
@@ -11,11 +13,12 @@
 
 .userList {
   flex-grow: 1;
-  overflow-y: auto;
+  overflow-y: auto; /* Allows scrolling if user list is long */
+  min-width: 224px;
 }
 
 .userItem {
-  transition: background-color red;
+  transition: background-color 0.2s; /* Smooth background color transition */
 }
 
 .userItem:hover {
@@ -23,5 +26,23 @@
 }
 
 .createGroupBtn {
-  align-self: flex-end;
+  align-self: flex-end; /* Align create group button to the right */
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%; /* Full width on mobile */
+    padding: 12px;
+    max-width: 200px !important;
+    overflow: hidden; 
+    position: relative;
+    margin-top: 4rem;
+  }
+  
+  .userList {
+    min-width: 100%; /* Ensure user list fills full width */
+  }
+  .createGroupBtn{
+    margin-right:'20px'
+  }
 }

@@ -39,10 +39,10 @@ io.on("connection", (socket) => {
           if (targetSocket) {
               targetSocket.emit("directMessage", { from: email, name: name, message: data.message });
           } else {
-              socket.emit("userDisconnected", { email: email });
+              socket.emit("userDisconnected", { email: email,remove:true });
           }
       } else {
-          socket.emit("userDisconnected", { email: email });
+          socket.emit("userDisconnected", { email: email,remove:true });
       }
   });
 

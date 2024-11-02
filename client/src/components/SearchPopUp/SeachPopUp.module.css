@@ -4,11 +4,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* semi-transparent background */
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Make sure it's above other elements */
+  z-index: 10000; /* Ensure it's above other elements */
+  
 }
 
 .popup {
@@ -16,8 +17,8 @@
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  max-width: 400px; /* Limit the width of the popup */
-  width: 100%; /* Make it responsive */
+  max-width: 400px; /* Max width for desktop */
+  width: 90%; /* Responsive width */
 }
 
 .closeButton {
@@ -37,5 +38,15 @@
 }
 
 .resultItem:hover {
-  background-color: rgba(0, 0, 0, 0.1); /* Add a hover effect */
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .popup {
+    padding: 12px; /* Adjust padding for mobile */
+  }
+  
+  .resultItem {
+    padding: 12px; /* More padding for better touch experience */
+  }
 }
