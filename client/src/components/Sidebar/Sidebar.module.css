@@ -1,5 +1,5 @@
 .sidebar {
-  min-width: 250px; /* Fixed width for desktop */
+  min-width: 224px; /* Fixed width for desktop */
   padding: 16px;
   display: flex;
   flex-direction: column;
@@ -13,7 +13,7 @@
 .userList {
   flex-grow: 1;
   overflow-y: auto; /* Allows scrolling if user list is long */
-  min-width: 200px;
+  min-width: 224px;
 }
 
 .userItem {
@@ -31,7 +31,9 @@
 @media (max-width: 768px) {
   .sidebar {
     width: 100%; /* Full width on mobile */
-    padding: 12px; /* Adjust padding for mobile */
+    padding: 12px;
+    max-width: 200px !important;
+    overflow: hidden; /* Adjust padding for mobile */
   }
   
   .userList {

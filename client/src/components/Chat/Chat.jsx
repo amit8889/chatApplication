@@ -16,6 +16,7 @@ import {
   Toolbar,
    Modal
 } from "@mui/material";
+import UploadIcon from '@mui/icons-material/Upload';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import { uploadFile } from "../../services/api.js";
@@ -342,8 +343,8 @@ function Chat({ loginData }) {
   return (
     <Box className={styles.container} sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       {/* Navbar */}
-      <AppBar position="static">
-      <Toolbar>
+      <AppBar position="static" sx={{ backgroundColor: '#007bff' }}>
+      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         {/* Toggle Button for Sidebar */}
         <Button 
           onClick={handleToggleSidebar} 
@@ -355,19 +356,34 @@ function Chat({ loginData }) {
           variant="outlined"
         >
           {isSidebarOpen ? <CloseIcon /> : <MenuIcon />}
-          
         </Button>
         
-        <Typography    sx={{ flexGrow: 1, ml: 1 }}>
-          {selectedUser?.roomName? `${selectedUser?.roomName?.substring(0,10)}` :selectedUser?.name? ` ${selectedUser?.name?.substring(0,10)} ` 
-          : "Chat App"}
+        <Typography 
+          variant="h6" 
+          sx={{ flexGrow: 1, ml: 1, color: 'white' }}
+        >
+          {selectedUser?.roomName 
+            ? `${selectedUser?.roomName?.substring(0, 10)}`
+            : selectedUser?.name 
+              ? `${selectedUser?.name?.substring(0, 10)}`
+              : "Chat App"}
         </Typography>
-        <Typography  sx={{borderRadius:'50px',border:'1px solid white',padding:'2px'}}variant="subtitle1" >
-        { loginData?.name.substring(0,4)}
+        
+        <Typography 
+          sx={{
+            borderRadius: '50px',
+            border: '1px solid white',
+            padding: '2px 10px',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center'
+          }} 
+          variant="subtitle1"
+        >
+          {loginData?.name?.substring(0, 4) || "User"}
         </Typography>
       </Toolbar>
     </AppBar>
-
       {/* Search Popup */}
       {searchResult && (
         <SearchPopUp
@@ -493,36 +509,48 @@ function Chat({ loginData }) {
 
           {/* Message Input Section */}
           <Box
-            className={styles.msgInput}
-            sx={{ display: "flex", alignItems: "center", mt: 2, padding: 1, backgroundColor: '#fff', borderTop: '1px solid #ccc' }}
-          >
-            <input
-              type="file"
-              onChange={handleFileChange}
-              style={{ display: "none" }}
-              id="file-upload"
-            />
-            <label htmlFor="file-upload">
-              <Button variant="outlined" component="span">
-                Upload File
-              </Button>
-            </label>
-            <TextField
-              value={isValidURL(message) ? message.split("/").pop() : message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type a message..."
-              sx={{ flexGrow: 1, ml: 1, mb: { xs: 1, md: 0 } }}
-              variant="outlined"
-              size="small"
-            />
-            <Button
-              variant="contained"
-              disabled={disableButton}
-              sx={{ ml: 1, opacity: disableButton ? 0.5 : 1 }}
-              onClick={handleSendMessage}
-            >
-              Send
-            </Button>
+      className={styles.msgInput}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        position: 'fixed', // Fixed position
+        bottom: 0, // Stick to the bottom
+        left: 0,
+        right: 0,
+        padding: 1,
+        backgroundColor: '#fff',
+        borderTop: '1px solid #ccc',
+        zIndex: 1000, // Ensure it stays above other content
+      }}
+    >
+      <input
+        type="file"
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+        id="file-upload"
+      />
+      <label htmlFor="file-upload">
+        <Button variant="outlined" sx={{height:"2.5rem"}}component="span" startIcon={<UploadIcon />}>
+          Upload
+        </Button>
+      </label>
+      <TextField
+        value={isValidURL(message) ? message.split('/').pop() : message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Type a message..."
+        sx={{ flexGrow: 1, ml: 1, mb: { xs: 1, md: 0 } }}
+        variant="outlined"
+        size="small"
+      />
+      <Button
+        variant="contained"
+        disabled={disableButton}
+        sx={{ ml: 1, opacity: disableButton ? 0.5 : 1 }}
+        onClick={handleSendMessage}
+      >
+        Send
+      </Button>
+   
           </Box>
         </Box>
       </Box>
