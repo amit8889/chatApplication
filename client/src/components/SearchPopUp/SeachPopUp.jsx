@@ -17,7 +17,7 @@ const SearchPopUp = ({ searchResult, handleSearchUser }) => {
         <div>
             {showPopup && searchResult?.length > 0 && (
                 <div className={styles.popupOverlay} onClick={() => setShowPopup(false)}>
-                    <Paper className={styles.popup} onClick={(e) => e.stopPropagation()}>
+                    <Paper className={styles.popup}  elevation={0} onClick={(e) => e.stopPropagation()}>
                         <IconButton className={styles.closeButton} onClick={() => setShowPopup(false)}>
                             <CloseIcon />
                         </IconButton>

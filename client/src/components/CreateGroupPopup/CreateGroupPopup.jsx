@@ -7,7 +7,10 @@ import {
   FormControlLabel,
   Typography,
   Paper,
+  Modal,
+  IconButton
 } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 import { getAllLiveUser } from "../../services/api.js";
 import styles from "./CreateGroupPopup.module.css";
 
@@ -50,30 +53,34 @@ const CreateGroupPopup = ({
   };
 
   return (
-    <Box
-      className={styles.container}
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      height="100vh"
+    <Modal
+      open={true}
+      onClose={() => setIsCreateGrpPopupOpen(false)}
+      disableAutoFocus
+      disableEnforceFocus
+      sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
     >
       <Paper
         className={styles.popup}
         elevation={3}
         sx={{ padding: 2, width: "300px", maxWidth: "80%" }}
       >
-        <Typography variant="h6" gutterBottom>
-          Create Group
-        </Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Typography variant="h6" gutterBottom>
+            Create Group
+          </Typography>
+          <IconButton onClick={() => setIsCreateGrpPopupOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
         <TextField
           type="text"
           name="groupName"
           id="group-name-input"
           value={groupName}
           placeholder="Enter group name..."
-          onChange={(e) => {console.log("eee"+e);setGroupname(e.target.value)}}
+          onChange={(e) => setGroupname(e.target.value)}
           fullWidth
-          onClick={(e) => {console.log("===");}}
           margin="normal"
           inputProps={{ style: { fontSize: "16px" } }}
         />
@@ -107,7 +114,7 @@ const CreateGroupPopup = ({
           </Button>
         </Box>
       </Paper>
-    </Box>
+    </Modal>
   );
 };
 
