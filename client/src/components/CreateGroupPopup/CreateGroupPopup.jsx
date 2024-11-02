@@ -1,73 +1,81 @@
 import React, { useEffect, useState } from 'react';
+import { Box, Button, TextField, Checkbox, FormControlLabel, Typography, Paper } from '@mui/material';
+import { getAllLiveUser } from "../../services/api.js";
 import styles from './CreateGroupPopup.module.css';
-import {getAllLiveUser} from "../../services/api.js"
-const CreateGroupPopup = ({ setIsCreateGrpPopupOpen,accessToken,handleGroupCreation }) => {
+
+const CreateGroupPopup = ({ setIsCreateGrpPopupOpen, accessToken, handleGroupCreation }) => {
     const [groupData, setGroupData] = useState([]);
-    const [groupName,setGroupname] = useState(null)
+    const [groupName, setGroupname] = useState('');
     const [selectUser, setSelectedUser] = useState([]);
-    const liveUser = async()=>{
-      const users =  await getAllLiveUser(accessToken)
-      setGroupData(users?.data || [])
-    }
+
+    const liveUser = async () => {
+        const users = await getAllLiveUser(accessToken);
+        setGroupData(users?.data || []);
+    };
+
     useEffect(() => {
-        if(accessToken){
-            liveUser()
+        if (accessToken) {
+            liveUser();
         }
-    }, []);
+    }, [accessToken]);
+
     const handleCreateGroup = () => {
-        // call func to handle group
-        if(!groupName?.trim() || selectUser?.length==0){
-            alert('Please select users and entre group name')
+        if (!groupName?.trim() || selectUser.length === 0) {
+            alert('Please select users and enter group name');
             return;
         }
-        handleGroupCreation(groupName,selectUser)
+        handleGroupCreation(groupName, selectUser);
         setIsCreateGrpPopupOpen(false);
-        
-    }
+    };
 
-    const handleChange = (e,user,index) => {
+    const handleChange = (e, user) => {
         if (e.target.checked) {
             setSelectedUser([...selectUser, user.email]);
-        }else{
-            // remove uncheked user
-            const data = selectUser.filter(val=>val!=user.email)
-            setSelectedUser(data)
+        } else {
+            const data = selectUser.filter(val => val !== user.email);
+            setSelectedUser(data);
         }
-        
-        
-    }
+    };
+
     return (
-        <div className={styles.container}>
-            <div className={styles.popup} onClick={(e) => e.stopPropagation()}>
-                <input
+        <Box className={styles.container} display="flex" justifyContent="center" alignItems="center" height="100vh">
+            <Paper className={styles.popup} elevation={3} sx={{ padding: 2, width: '300px', maxWidth: '80%' }}>
+                <Typography variant="h6" gutterBottom>
+                    Create Group
+                </Typography>
+                <TextField
                     type="text"
                     name="groupName"
-                    value = {groupName}
+                    value={groupName}
                     placeholder="Enter group name..."
-                    onChange={(e) => setGroupname(e.target.value
-                    )}
-                    className={styles.searchInput}
+                    onChange={(e) => setGroupname(e.target.value)}
+                    fullWidth
+                    margin="normal"
                 />
-               { groupData &&Array.isArray(groupData)&& groupData.map((user, index) => (
-                    <div
+                {groupData && Array.isArray(groupData) && groupData.map((user, index) => (
+                    <FormControlLabel
                         key={index}
-                        className={styles.resultItem}
-                    >
-                        <input
-                            type='checkbox'                           
-                            onChange={(e) => handleChange(e,user,index)}                            
-                        /><label>{user.name}</label>
-                    </div>
-
+                        control={
+                            <Checkbox
+                                onChange={(e) => handleChange(e, user)}
+                                checked={selectUser.includes(user.email)}
+                            />
+                        }
+                        label={user.name}
+                    />
                 ))}
-                <div className={styles.creategroupbutton}>
-                    <button className={styles.btn} onClick={e => setIsCreateGrpPopupOpen(false)}>Cancel</button>
-                    <button className={styles.btn} style={{ backgroundColor: '#007bff' }} onClick={e => handleCreateGroup()}>Create Group</button>
-                </div>
-            </div>
-        </div>
-
-
+                <Box display="flex" justifyContent="space-between" mt={2}>
+                    <Button variant="outlined" onClick={() => setIsCreateGrpPopupOpen(false)}>Cancel</Button>
+                    <Button 
+                        variant="contained" 
+                        onClick={handleCreateGroup} 
+                        sx={{ backgroundColor: '#007bff', color: 'white' }}
+                    >
+                        Create Group
+                    </Button>
+                </Box>
+            </Paper>
+        </Box>
     );
 };
 

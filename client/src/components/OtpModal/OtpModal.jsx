@@ -1,86 +1,139 @@
 import React, { useState } from 'react';
 import { requestOtp, verifyOtp } from "../../services/api";
-import styles from './OtpModal.module.css';
+import { Box, Button, TextField, Typography, CircularProgress } from '@mui/material';
 
-function OtpModal({ setIsVerified,setLoginData }) {
+function OtpModal({ setIsVerified, setLoginData }) {
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [otp, setOtp] = useState('');
-  const [otpData,setOtpData]=useState();
+  const [otpData, setOtpData] = useState();
   const [otpSent, setOtpSent] = useState(false);
+  const [errors, setErrors] = useState({ email: '', name: '' });
+  const [loading, setLoading] = useState(false);
 
-  const handleRequestOtp = async() => {
-    const res=await requestOtp(email);
-    console.log(res);
-    if(res?.success===true){
-      setOtpData(res);
-      setOtpSent(true);
-    }   
-  //   const abc={
-  //     "message": "Otp verified!!",
-  //     "success": true,
-  //     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImF2NDE2MDQ0QGdtYWlsLmNvbSIsIm5hbWUiOiJBbWl0IiwiaWF0IjoxNzMwMzU3MDkwLCJleHAiOjE3MzAzNjA2OTB9.Dh2SkNXpX8pvF1nUX8VmpO-aPAuGx-hL7CMqKaUAFLc"
-  // }  
-  // console.log({accessToken:abc.accessToken,
-  //   email,
-  //   name})
-  // setLoginData({accessToken:abc.accessToken,
-  //   email,
-  //   name});
-  //     setIsVerified(true);
+  const isValidEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
   };
 
-  const handleVerifyOtp = async() => {
-    const data={
-      email,
-      name, 
-      otp, 
-      hash:otpData?.hash 
+  const handleRequestOtp = async () => {
+    const newErrors = { email: '', name: '' };
+    if (name.length < 4) {
+      newErrors.name = 'Name must be at least 4 characters long.';
     }
-    const res=await verifyOtp(data);
-    if(res?.success===true){
+    if (!isValidEmail(email)) {
+      newErrors.email = 'Please enter a valid email address.';
+    }
+    if (newErrors.name || newErrors.email) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setLoading(true);
+    const res = await requestOtp(email);
+    setLoading(false);
+    if (res?.success === true) {
+      setOtpData(res);
+      setOtpSent(true);
+      setErrors({ email: '', name: '' });
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    const data = {
+      email,
+      name,
+      otp,
+      hash: otpData?.hash
+    };
+    setLoading(true);
+    const res = await verifyOtp(data);
+    setLoading(false);
+    if (res?.success === true) {
       setLoginData({
-        accessToken:res.accessToken,
+        accessToken: res.accessToken,
         email,
         name
       });
       setIsVerified(true);
-    }      
+    }
   };
 
-  return (<div className={styles.modalContainer}>
-    <div className={styles.modal}>
-      <h2>{otpSent ? 'Enter OTP' : 'Register or Login'}</h2>
-      <input
-        type="name"
+  return (
+    <Box
+      sx={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 4,
+        borderRadius: 2,
+        boxShadow: 3,
+        width: 400,
+        bgcolor: 'background.paper',
+        backdropFilter: 'blur(10px)',
+        zIndex: 1000,
+      }}
+    >
+      <Typography variant="h5" gutterBottom>
+        {otpSent ? 'Enter OTP' : 'Join Chat'}
+      </Typography>
+      <TextField
+        label="Name"
+        variant="outlined"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Enter name"
-        className={styles.input}
+        fullWidth
+        margin="normal"
+        error={!!errors.name}
+        helperText={errors.name}
       />
-      <input
+      <TextField
+        label="Email"
         type="email"
+        variant="outlined"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
-        placeholder="Enter email"
-        className={styles.input}
+        fullWidth
+        margin="normal"
+        error={!!errors.email}
+        helperText={errors.email}
       />
-      {!otpSent ? (
-        <button onClick={handleRequestOtp} className={styles.button}>Request OTP</button>
+      {loading ? (
+        <CircularProgress />
+      ) : !otpSent ? (
+        <Button
+          variant="contained"
+          onClick={handleRequestOtp}
+          sx={{ marginTop: 2 }}
+        >
+          Request OTP
+        </Button>
       ) : (
         <>
-          <input
+          <TextField
+            label="OTP"
             type="text"
+            variant="outlined"
             value={otp}
             onChange={(e) => setOtp(e.target.value)}
-            placeholder="Enter OTP"
-            className={styles.input}
+            fullWidth
+            margin="normal"
           />
-          <button onClick={handleVerifyOtp} className={styles.button}>Verify OTP</button>
+          <Button
+            variant="contained"
+            onClick={handleVerifyOtp}
+            sx={{ marginTop: 2 }}
+          >
+            Verify OTP
+          </Button>
         </>
       )}
-    </div>
-    </div>
+    </Box>
   );
 }
 

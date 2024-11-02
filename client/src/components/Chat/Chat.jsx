@@ -6,6 +6,15 @@ import {
   createGroup,
   sendMessageInRoom,
 } from "../../services/websocket.js";
+import {
+  Box,
+  Paper,
+  Typography,
+  Button,
+  TextField,
+  AppBar,
+  Toolbar,
+} from "@mui/material";
 import { uploadFile } from "../../services/api.js";
 import styles from "./Chat.module.css";
 import SearchPopUp from "../SearchPopUp/SeachPopUp"; // Corrected import
@@ -36,7 +45,6 @@ function Chat({ loginData }) {
     (data) => {
       setMessages((prevMessages) => {
         let msg = prevMessages.room[data.roomName] || [];
-        console.log(prevMessages);
         msg.push({
           email: data.email,
           message: `room joined`,
@@ -60,9 +68,7 @@ function Chat({ loginData }) {
         const findRoom = prevUsers.find(
           (val) => val?.roomName === data.roomName
         );
-        //console.log("======>", findRoom);
         if (!findRoom) {
-          console.log(usersAndRoom);
           return [...prevUsers, { roomName: data.roomName }];
         }
         return prevUsers;
@@ -71,12 +77,9 @@ function Chat({ loginData }) {
     [usersAndRoom]
   ); // Add dependencies if needed
   const handleRoomMessage = useCallback((data) => {
-    console.log("data", data);
-    //console.log("=====room message data====", data);
 
     setMessages((prevMessages) => {
       const msg = prevMessages.room[data.roomName] || [];
-      console.log(prevMessages);
       msg.push({
         email: data.email,
         message: data.message,
@@ -96,20 +99,19 @@ function Chat({ loginData }) {
       };
     });
 
-    setUsersAndRoom((prevUsers) => {
-      const userExists = prevUsers.find(
-        (val) => val?.roomName === data.roomName
-      );
-      console.log("======>", userExists);
-      if (!userExists) {
-        console.log(prevUsers);
-        return [...prevUsers, { roomName: data.roomName }];
-      }
-      return prevUsers;
-    });
+    // setUsersAndRoom((prevUsers) => {
+    //   const userExists = prevUsers.find(
+    //     (val) => val?.roomName === data.roomName
+    //   );
+    //   console.log("======>", userExists);
+    //   if (!userExists) {
+    //     console.log(prevUsers);
+    //     return [...prevUsers, { roomName: data.roomName }];
+    //   }
+    //   return prevUsers;
+    // });
   }, []);
   const handleDirectMessage = useCallback((data) => {
-    console.log("=====direct message data====", data);
     setMessages((prevMessages) => {
       const msg = prevMessages.direct[data.from] || [];
       const updatedMessages = [
@@ -143,10 +145,8 @@ function Chat({ loginData }) {
   }, []);
 
   const handleUserDisconnected = useCallback((data) => {
-    console.log("=====user disconnected====", data);
     setMessages((prevMessages) => {
       let msg = prevMessages.room[data.roomName] || [];
-      console.log(prevMessages);
       msg.push({
         email: data.email,
         message: `room leav`,
@@ -173,14 +173,14 @@ function Chat({ loginData }) {
   }, []);
 
   const handleSearch = useCallback((data) => {
-    console.log("=====search user data====", data);
     setSearchResult(data);
   }, []);
+
+
   useEffect(() => {
     if (!socket) {
       return;
     }
-    console.log("====================eve================");
     socket.on("searchUser", handleSearch);
     socket.on("directMessage", handleDirectMessage);
     socket.on("userDisconnected", handleUserDisconnected);
@@ -201,11 +201,11 @@ function Chat({ loginData }) {
       alert("Please select group or person ");
       return;
     }
-    if(!message || !message.trim()){
+    if (!message || !message.trim()) {
       alert("Please enter message");
       return;
     }
-    
+
     if (selectedUser?.email) {
       let msg = messages.direct[selectedUser.email] || [];
       msg.push({
@@ -261,14 +261,8 @@ function Chat({ loginData }) {
 
   const onUserAndRoomSelect = (data) => {
     const users = [...usersAndRoom];
-    // console.log(users)
-    // console.log(data)
     const findUser = users.find((val) => val.email === data.email);
-    console.log("====77==>", findUser);
-    console.log(data);
     if (!findUser) {
-      console.log(usersAndRoom);
-      //alert("test3");
       setUsersAndRoom((prev) => [
         ...prev,
         { email: data.from, name: data.name },
@@ -314,9 +308,7 @@ function Chat({ loginData }) {
   // Define the handleSearchUser function
   const handleSearchUser = (data) => {
     const emailExists = usersAndRoom.find((item) => item.email === data.email);
-    console.log(emailExists);
     if (!emailExists) {
-      //alert("test4");
       setUsersAndRoom([...usersAndRoom, { ...data }]);
     }
     setSelectedUser(data);
@@ -325,7 +317,6 @@ function Chat({ loginData }) {
   const handleGroupCreation = async (groupName, groupData) => {
     createGroup(groupName, groupData);
   };
-
 
   const isValidURL = (urlString) => {
     try {
@@ -337,13 +328,30 @@ function Chat({ loginData }) {
   };
 
   return (
-    <div className={styles.container}>
+    <Box className={styles.container}>
+      {/* Navbar */}
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" sx={{ flexGrow: 1, ml: 1 }}>
+            Chat Application
+          </Typography>
+          <Typography variant="subtitle1">
+            {selectedUser?.name ||
+              selectedUser?.roomName ||
+              "Select a User/Room"}
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      {/* Search Popup */}
       {searchResult && (
         <SearchPopUp
           searchResult={searchResult}
           handleSearchUser={handleSearchUser}
         />
       )}
+
+      {/* Create Group Popup */}
       {isCreateGrpPopupOpen && (
         <CreateGroupPopup
           handleGroupCreation={handleGroupCreation}
@@ -351,75 +359,108 @@ function Chat({ loginData }) {
           setIsCreateGrpPopupOpen={setIsCreateGrpPopupOpen}
         />
       )}
-      <Sidebar
-        usersAndRoom={usersAndRoom}
-        onUserAndRoomSelect={onUserAndRoomSelect}
-        setSearchResult={setSearchResult}
-        selectedUser={selectedUser}
-        setIsCreateGrpPopupOpen={setIsCreateGrpPopupOpen}
-      />
-      <div className={styles.main}>
-        <div className={styles.messages}>
-          {selectedUser &&
-            messages?.[selectedUser.roomName ? "room" : "direct"][
-              selectedUser.roomName ?? selectedUser.email
-            ]?.map((msg, index) => (
-              <span
-              key={index}
-              className={
-                loginData.email !== msg.email
-                  ? styles.ownMessage
-                  : styles.message
-              }
-            >
-              <strong>{msg.name}:</strong>
-              {msg.message && isValidURL(msg.message) ? (
-                <>
-                  <div style={{ marginTop: '5px' }}>
-                    <iframe
-                      src={msg.message}
-                      width="300" // Adjust width for better visibility
-                      height="200" // Adjust height for better visibility
-                      title="URL Preview"
-                      style={{ border: 'none' }}
-                    />
-                  </div>
-                  <a 
-                    style={{ cursor: "pointer", textDecoration: 'none', color: 'blue',opacity:1 }} 
-                    href={msg.message} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                  >
-                    Download 
-                  </a>
-                </>
-              ) : (
-                <span>{msg.message}</span>
-              )}
-            </span>
-            ))}
-        </div>
 
-        <div className={styles.msgInput}>
-          <input type="file" onChange={handleFileChange} />
-          <input
-            type="text"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type a message..."
-            className={styles.input}
-          />
-          <button
-            disabled={disableButton}
-            style={{ opacity: disableButton ? 0.5 : 1 }}
-            className={styles.sendBtn}
-            onClick={handleSendMessage}
+      <div style={{ display: "flex",minHeight:"85vh" }}>
+        {/* Sidebar */}
+        <Sidebar
+          usersAndRoom={usersAndRoom}
+          onUserAndRoomSelect={onUserAndRoomSelect}
+          setSearchResult={setSearchResult}
+          selectedUser={selectedUser}
+          setIsCreateGrpPopupOpen={setIsCreateGrpPopupOpen}
+        />
+
+        {/* Main Content */}
+        <Box className={styles.main}>
+          <Paper className={styles.messages} elevation={3}>
+            {selectedUser &&
+              messages?.[selectedUser.roomName ? "room" : "direct"][
+                selectedUser.roomName ?? selectedUser.email
+              ]?.map((msg, index) => (
+                <Typography
+                  key={index}
+                  className={
+                    loginData.email === msg.email
+                      ? styles.ownMessage
+                      : styles.message
+                  }
+                >
+                  <strong>{msg.name}:</strong>
+                  {msg.message && isValidURL(msg.message) ? (
+                    <>
+                      <Box sx={{ mt: 1 }}>
+                        <iframe
+                          src={msg.message}
+                          width="300" // Adjust width for better visibility
+                          height="200" // Adjust height for better visibility
+                          title="URL Preview"
+                          style={{ border: "none" }}
+                        />
+                      </Box>
+                      <a
+                        style={{
+                          cursor: "pointer",
+                          textDecoration: "none",
+                          color: "blue",
+                          opacity: 1,
+                        }}
+                        href={msg.message}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const link = document.createElement("a");
+                          link.href = msg.message;
+                          link.setAttribute("download", "");
+                          link.setAttribute("target", "_blank"); // Optional: Open in a new tab as a fallback
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                        }}
+                      >
+                        Download
+                      </a>
+                    </>
+                  ) : (
+                    <span>{msg.message}</span>
+                  )}
+                </Typography>
+              ))}
+          </Paper>
+
+          {/* Message Input Section */}
+          <Box
+            className={styles.msgInput}
+            sx={{ display: "flex", alignItems: "center", mt: 2 }}
           >
-            Send
-          </button>
-        </div>
+            <input
+              type="file"
+              onChange={handleFileChange}
+              style={{ display: "none" }}
+              id="file-upload"
+            />
+            <label htmlFor="file-upload">
+              <Button variant="outlined" component="span">
+                Upload File
+              </Button>
+            </label>
+            <TextField
+              value={isValidURL(message) ? message.split("/").pop() : message}
+
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Type a message..."
+              sx={{ flexGrow: 1, ml: 1 }}
+            />
+            <Button
+              variant="contained"
+              disabled={disableButton}
+              sx={{ ml: 1, opacity: disableButton ? 0.5 : 1 }}
+              onClick={handleSendMessage}
+            >
+              Send
+            </Button>
+          </Box>
+        </Box>
       </div>
-    </div>
+    </Box>
   );
 }
 
