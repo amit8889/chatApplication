@@ -77,18 +77,23 @@
   background-color: #fafafa;
 }
 
-.message {
-  background-color: #e1f5fe;
+.otherMessage {
+  background-color: #e9f2ee;
+  margin-top: 10px !important;
   padding: 8px;
   border-radius: 5px;
   margin-bottom: 8px;
-  max-width: 70%;
+  text-align: left;
+  max-width: 70%; 
   word-wrap: break-word;
+  margin-right: auto;
 }
 
 .ownMessage {
-  background-color: #d1e7dd;
+  background-color: #e9f2ee;
   padding: 8px;
+  margin-top: 10px !important;
+  text-align: right;
   border-radius: 5px;
   margin-bottom: 8px;
   margin-left: auto;
