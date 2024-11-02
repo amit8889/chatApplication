@@ -70,10 +70,10 @@ function OtpModal({ setIsVerified, setLoginData }) {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 4,
+        padding: { xs: 2, sm: 4 },
         borderRadius: 2,
         boxShadow: 3,
-        width: 400,
+        width: { xs: '90%', sm: 400 },
         bgcolor: 'background.paper',
         backdropFilter: 'blur(10px)',
         zIndex: 1000,
@@ -109,7 +109,7 @@ function OtpModal({ setIsVerified, setLoginData }) {
         <Button
           variant="contained"
           onClick={handleRequestOtp}
-          sx={{ marginTop: 2 }}
+          sx={{ marginTop: 2, width: { xs: '100%', sm: 'auto' } }}
         >
           Request OTP
         </Button>
@@ -127,7 +127,7 @@ function OtpModal({ setIsVerified, setLoginData }) {
           <Button
             variant="contained"
             onClick={handleVerifyOtp}
-            sx={{ marginTop: 2 }}
+            sx={{ marginTop: 2, width: { xs: '100%', sm: 'auto' } }}
           >
             Verify OTP
           </Button>

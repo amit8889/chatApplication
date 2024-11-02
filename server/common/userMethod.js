@@ -76,8 +76,6 @@ const searchUser = async ({search,email}) => {
         AND email != ?
     `;
     const data = [`%${search}%`,`%${search}%`,email];
-    console.log(query)
-    console.log(data)
     const [result] = await pool.query(query, data);
     if (result.length > 0) {
       return result;

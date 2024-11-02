@@ -14,7 +14,10 @@ import {
   TextField,
   AppBar,
   Toolbar,
+   Modal
 } from "@mui/material";
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 import { uploadFile } from "../../services/api.js";
 import styles from "./Chat.module.css";
 import SearchPopUp from "../SearchPopUp/SeachPopUp"; // Corrected import
@@ -31,9 +34,13 @@ function Chat({ loginData }) {
   const [socket, setSocket] = useState(null);
   const ref = useRef(false);
   const messagesEndRef = useRef(null);
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleToggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
   };
   useEffect(() => {
     scrollToBottom();
@@ -333,20 +340,33 @@ function Chat({ loginData }) {
   };
 
   return (
-    <Box className={styles.container}>
+    <Box className={styles.container} sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       {/* Navbar */}
       <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" sx={{ flexGrow: 1, ml: 1 }}>
-            Chat Application
-          </Typography>
-          <Typography variant="subtitle1">
-            {selectedUser?.name ||
-              selectedUser?.roomName ||
-              "Select a User/Room"}
-          </Typography>
-        </Toolbar>
-      </AppBar>
+      <Toolbar>
+        {/* Toggle Button for Sidebar */}
+        <Button 
+          onClick={handleToggleSidebar} 
+          sx={{ 
+            mr: 2, 
+            display: { xs: 'block', md: 'none' }, 
+            color: "white" 
+          }} // Show on mobile only
+          variant="outlined"
+        >
+          {isSidebarOpen ? <CloseIcon /> : <MenuIcon />}
+          
+        </Button>
+        
+        <Typography    sx={{ flexGrow: 1, ml: 1 }}>
+          {selectedUser?.roomName? `${selectedUser.roomName?.substring(0,10)}` :selectedUser.name? ` ${selectedUser.name?.substring(0,10)} ` 
+          : "Chat App"}
+        </Typography>
+        <Typography  sx={{borderRadius:'50px',border:'1px solid white',padding:'2px'}}variant="subtitle1" >
+        { loginData.name.substring(0,4)}
+        </Typography>
+      </Toolbar>
+    </AppBar>
 
       {/* Search Popup */}
       {searchResult && (
@@ -365,84 +385,116 @@ function Chat({ loginData }) {
         />
       )}
 
-      <div style={{ display: "flex", minHeight: "85vh" }}>
-        {/* Sidebar */}
-        <Sidebar
-          usersAndRoom={usersAndRoom}
-          onUserAndRoomSelect={onUserAndRoomSelect}
-          setSearchResult={setSearchResult}
-          selectedUser={selectedUser}
-          setIsCreateGrpPopupOpen={setIsCreateGrpPopupOpen}
-        />
+      {/* Sidebar Modal for Mobile View */}
+      <Modal
+        open={isSidebarOpen}
+        onClose={handleToggleSidebar}
+        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center',position:'absolute',left:0,maxWidth:'250px',zIndex:800 }}
+      >
+        <Box 
+          sx={{ 
+            width: '100%', 
+            maxWidth: '400px', 
+            bgcolor: 'background.paper', 
+            borderRadius: 1, 
+            boxShadow: 3, 
+            height: '100%', 
+            overflow: 'auto' 
+          }}
+        >
+          <Sidebar
+            usersAndRoom={usersAndRoom}
+            onUserAndRoomSelect={onUserAndRoomSelect}
+            setSearchResult={setSearchResult}
+            selectedUser={selectedUser}
+            setIsCreateGrpPopupOpen={setIsCreateGrpPopupOpen}
+          />
+        </Box>
+      </Modal>
+
+      {/* Main Content */}
+      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+        {/* Sidebar for Desktop/Tablets */}
+        <Box 
+          sx={{ 
+            width: { xs: '0', md: '250px' }, 
+            display: { xs: 'none', md: 'block' }, 
+            borderRight: '1px solid #ccc' 
+          }}
+        >
+          <Sidebar
+            usersAndRoom={usersAndRoom}
+            onUserAndRoomSelect={onUserAndRoomSelect}
+            setSearchResult={setSearchResult}
+            selectedUser={selectedUser}
+            setIsCreateGrpPopupOpen={setIsCreateGrpPopupOpen}
+          />
+        </Box>
 
         {/* Main Content */}
-        <Box className={styles.main}>
-          <Paper className={styles.messages} elevation={3}>
-            {selectedUser &&
-              messages?.[selectedUser.roomName ? "room" : "direct"][
-                selectedUser.roomName ?? selectedUser.email
-              ]?.map((msg, index) => (
-                <Box
-                  key={index}
+        <Box className={styles.main} sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Paper className={styles.messages} elevation={3} sx={{ flex: 1, overflowY: 'auto', padding: 2 }}>
+            {selectedUser && messages?.[selectedUser.roomName ? "room" : "direct"][
+              selectedUser.roomName ?? selectedUser.email
+            ]?.map((msg, index) => (
+              <Box
+                key={index}
+                sx={{
+                  display: "flex",
+                  justifyContent: loginData.email === msg.email ? "flex-end" : "flex-start",
+                  mb: 1,
+                }}
+              >
+                <Typography
+                  className={loginData.email === msg.email ? styles.ownMessage : styles.otherMessage}
                   sx={{
-                    display: "flex",
-                    justifyContent:
-                      loginData.email === msg.email ? "flex-end" : "flex-start",
-                    mb: 1,
+                    maxWidth: "60%",
+                    borderRadius: "10px",
+                    padding: "8px",
+                    backgroundColor: loginData.email === msg.email ? '#d1e7dd' : '#f8d7da',
+                    color: loginData.email === msg.email ? '#0f5132' : '#721c24',
                   }}
                 >
-                  <Typography
-                    className={
-                      loginData.email === msg.email
-                        ? styles.ownMessage
-                        : styles.otherMessage
-                    }
-                    sx={{
-                      maxWidth: "60%",
-                      borderRadius: "10px",
-                      padding: "8px",
-                    }}
-                  >
-                    <strong>{msg.name}:</strong>
-                    {msg.message && isValidURL(msg.message) ? (
-                      <>
-                        <Box sx={{ mt: 1 }}>
-                          <iframe
-                            src={msg.message}
-                            width="300"
-                            height="200"
-                            title="URL Preview"
-                            style={{ border: "none" }}
-                          />
-                        </Box>
-                        <a
-                          style={{
-                            cursor: "pointer",
-                            textDecoration: "none",
-                            color: "blue",
-                            opacity: 1,
-                          }}
-                          href={msg.message}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download
-                        >
-                          Download
-                        </a>
-                      </>
-                    ) : (
-                      <span>{msg.message}</span>
-                    )}
-                  </Typography>
-                </Box>
-              ))}
-              <div ref={messagesEndRef} />
+                  <strong>{msg.name}:</strong>
+                  {msg.message && isValidURL(msg.message) ? (
+                    <>
+                      <Box sx={{ mt: 1 }}>
+                        <iframe
+                          src={msg.message}
+                          width="300"
+                          height="200"
+                          title="URL Preview"
+                          style={{ border: "none", maxWidth: "100%", height: "auto" }}
+                        />
+                      </Box>
+                      <a
+                        style={{
+                          cursor: "pointer",
+                          textDecoration: "none",
+                          color: "blue",
+                          opacity: 1,
+                        }}
+                        href={msg.message}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                      >
+                        Download
+                      </a>
+                    </>
+                  ) : (
+                    <span styles={{maxWidth:"50vh"}}>{msg.message}</span>
+                  )}
+                </Typography>
+              </Box>
+            ))}
+            <div ref={messagesEndRef} />
           </Paper>
-              
+
           {/* Message Input Section */}
           <Box
             className={styles.msgInput}
-            sx={{ display: "flex", alignItems: "center", mt: 2 }}
+            sx={{ display: "flex", alignItems: "center", mt: 2, padding: 1, backgroundColor: '#fff', borderTop: '1px solid #ccc' }}
           >
             <input
               type="file"
@@ -459,7 +511,9 @@ function Chat({ loginData }) {
               value={isValidURL(message) ? message.split("/").pop() : message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type a message..."
-              sx={{ flexGrow: 1, ml: 1 }}
+              sx={{ flexGrow: 1, ml: 1, mb: { xs: 1, md: 0 } }}
+              variant="outlined"
+              size="small"
             />
             <Button
               variant="contained"
@@ -471,9 +525,15 @@ function Chat({ loginData }) {
             </Button>
           </Box>
         </Box>
-      </div>
+      </Box>
     </Box>
   );
-}
+};
+
+
+
+  
+  
+
 
 export default Chat;
