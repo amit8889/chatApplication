@@ -12,12 +12,8 @@
 
 .userList {
   flex-grow: 1;
-<<<<<<< Updated upstream
-  overflow-y: auto;
-=======
   overflow-y: auto; /* Allows scrolling if user list is long */
   min-width: 200px;
->>>>>>> Stashed changes
 }
 
 .userItem {
