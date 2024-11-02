@@ -30,7 +30,14 @@ function Chat({ loginData }) {
   const [searchResult, setSearchResult] = useState(null);
   const [socket, setSocket] = useState(null);
   const ref = useRef(false);
+  const messagesEndRef = useRef(null);
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
   // Initialize socket
   useEffect(() => {
     ref.current = socketInit(loginData?.accessToken);
@@ -77,7 +84,6 @@ function Chat({ loginData }) {
     [usersAndRoom]
   ); // Add dependencies if needed
   const handleRoomMessage = useCallback((data) => {
-
     setMessages((prevMessages) => {
       const msg = prevMessages.room[data.roomName] || [];
       msg.push({
@@ -175,7 +181,6 @@ function Chat({ loginData }) {
   const handleSearch = useCallback((data) => {
     setSearchResult(data);
   }, []);
-
 
   useEffect(() => {
     if (!socket) {
@@ -360,7 +365,7 @@ function Chat({ loginData }) {
         />
       )}
 
-      <div style={{ display: "flex",minHeight:"85vh" }}>
+      <div style={{ display: "flex", minHeight: "85vh" }}>
         {/* Sidebar */}
         <Sidebar
           usersAndRoom={usersAndRoom}
@@ -377,55 +382,63 @@ function Chat({ loginData }) {
               messages?.[selectedUser.roomName ? "room" : "direct"][
                 selectedUser.roomName ?? selectedUser.email
               ]?.map((msg, index) => (
-                <Typography
+                <Box
                   key={index}
-                  className={
-                    loginData.email === msg.email
-                      ? styles.ownMessage
-                      : styles.message
-                  }
+                  sx={{
+                    display: "flex",
+                    justifyContent:
+                      loginData.email === msg.email ? "flex-end" : "flex-start",
+                    mb: 1,
+                  }}
                 >
-                  <strong>{msg.name}:</strong>
-                  {msg.message && isValidURL(msg.message) ? (
-                    <>
-                      <Box sx={{ mt: 1 }}>
-                        <iframe
-                          src={msg.message}
-                          width="300" // Adjust width for better visibility
-                          height="200" // Adjust height for better visibility
-                          title="URL Preview"
-                          style={{ border: "none" }}
-                        />
-                      </Box>
-                      <a
-                        style={{
-                          cursor: "pointer",
-                          textDecoration: "none",
-                          color: "blue",
-                          opacity: 1,
-                        }}
-                        href={msg.message}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          const link = document.createElement("a");
-                          link.href = msg.message;
-                          link.setAttribute("download", "");
-                          link.setAttribute("target", "_blank"); // Optional: Open in a new tab as a fallback
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                        }}
-                      >
-                        Download
-                      </a>
-                    </>
-                  ) : (
-                    <span>{msg.message}</span>
-                  )}
-                </Typography>
+                  <Typography
+                    className={
+                      loginData.email === msg.email
+                        ? styles.ownMessage
+                        : styles.otherMessage
+                    }
+                    sx={{
+                      maxWidth: "60%",
+                      borderRadius: "10px",
+                      padding: "8px",
+                    }}
+                  >
+                    <strong>{msg.name}:</strong>
+                    {msg.message && isValidURL(msg.message) ? (
+                      <>
+                        <Box sx={{ mt: 1 }}>
+                          <iframe
+                            src={msg.message}
+                            width="300"
+                            height="200"
+                            title="URL Preview"
+                            style={{ border: "none" }}
+                          />
+                        </Box>
+                        <a
+                          style={{
+                            cursor: "pointer",
+                            textDecoration: "none",
+                            color: "blue",
+                            opacity: 1,
+                          }}
+                          href={msg.message}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          download
+                        >
+                          Download
+                        </a>
+                      </>
+                    ) : (
+                      <span>{msg.message}</span>
+                    )}
+                  </Typography>
+                </Box>
               ))}
+              <div ref={messagesEndRef} />
           </Paper>
-
+              
           {/* Message Input Section */}
           <Box
             className={styles.msgInput}
@@ -444,7 +457,6 @@ function Chat({ loginData }) {
             </label>
             <TextField
               value={isValidURL(message) ? message.split("/").pop() : message}
-
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type a message..."
               sx={{ flexGrow: 1, ml: 1 }}
