@@ -8,9 +8,7 @@ function validate(req, res, next) {
         const isValid = verifyAccessToken(token);
         if (isValid) {
             req.user = {email:isValid.email}
-            console.log("====00")
-            console.log(req.user)
-          return next();
+           return next();
         }
       }
   

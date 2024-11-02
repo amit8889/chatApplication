@@ -5,7 +5,6 @@ import styles from './SeachPopUp.module.css'; // Your custom CSS module
 
 const SearchPopUp = ({ searchResult, handleSearchUser }) => {
     const [showPopup, setShowPopup] = useState(false);
-    console.log("====>",searchResult,showPopup)
     useEffect(()=>{
       if(searchResult.length>0){
         setShowPopup(true)
