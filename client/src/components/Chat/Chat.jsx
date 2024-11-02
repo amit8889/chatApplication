@@ -507,14 +507,15 @@ function Chat({ loginData }) {
                 selectedUser.roomName ?? selectedUser.email
               ]?.map((msg, index) => (
                 <Box
-                  key={index}
-                  sx={{
-                    display: "flex",
-                    justifyContent:
-                      loginData.email === msg.email ? "flex-end" : "flex-start",
-                    mb: 1,
-                  }}
-                >
+                key={index}
+                sx={{
+                  display: "flex",
+                  justifyContent: loginData.email === msg.email ? "flex-end" : "flex-start",
+                  mb: 1,
+                  marginTop: window.innerWidth < 700 ? "3rem" : 0,
+                }}
+              >
+              
                   <Typography
                     className={
                       loginData.email === msg.email

@@ -40,12 +40,7 @@ function Sidebar({ usersAndRoom, onUserAndRoomSelect, setSearchResult, selectedU
                         onClick={() => onUserAndRoomSelect(data)}
                         selected={(selectedUser?.email || selectedUser?.roomName) === (data.email || data.roomName)}
                         className={styles.userItem}
-                        sx={{
-                          backgroundColor: (selectedUser?.email === data.email || selectedUser?.roomName === data.roomName) ? 'green' : 'transparent',
-                          '&.Mui-checked': {
-                            backgroundColor: (selectedUser?.email === data.email || selectedUser?.roomName === data.roomName) ? 'green' : 'transparent',
-                          },
-                        }}
+                        
                     >
                         <ListItemText
                             primary={data?.name ? data.name : data.roomName}
