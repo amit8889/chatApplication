@@ -209,7 +209,7 @@ function Chat({ loginData }) {
   }, [socket, handleSearch, handleDirectMessage, handleUserDisconnected]);
 
   const handleSendMessage = () => {
-    if (!handleSendMessage) {
+    if (!selectedUser) {
       alert("Please select group or person ");
       return;
     }
@@ -359,11 +359,11 @@ function Chat({ loginData }) {
         </Button>
         
         <Typography    sx={{ flexGrow: 1, ml: 1 }}>
-          {selectedUser?.roomName? `${selectedUser.roomName?.substring(0,10)}` :selectedUser.name? ` ${selectedUser.name?.substring(0,10)} ` 
+          {selectedUser?.roomName? `${selectedUser?.roomName?.substring(0,10)}` :selectedUser?.name? ` ${selectedUser?.name?.substring(0,10)} ` 
           : "Chat App"}
         </Typography>
         <Typography  sx={{borderRadius:'50px',border:'1px solid white',padding:'2px'}}variant="subtitle1" >
-        { loginData.name.substring(0,4)}
+        { loginData?.name.substring(0,4)}
         </Typography>
       </Toolbar>
     </AppBar>
